@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://hud001"]
+
+[ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="RoomLabel" type="Label" parent="."]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 200.0
+offset_bottom = 28.0
+text = "Hall"
+theme_override_font_sizes/font_size = 12
