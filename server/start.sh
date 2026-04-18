@@ -10,4 +10,4 @@ if ! command -v node >/dev/null 2>&1; then
     [ -x "$p/node" ] && export PATH="$p:$PATH" && break
   done
 fi
-exec node "$SCRIPT_DIR/dist/index.js"
+exec node "$SCRIPT_DIR/dist/index.js" >> "$SCRIPT_DIR/server.log" 2>&1

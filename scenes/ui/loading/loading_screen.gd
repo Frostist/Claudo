@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-const TIMEOUT := 30.0  # GM GameSetup (Claude Opus call) can take 5–15 s; 30 s provides headroom
+const TIMEOUT := 90.0  # GM GameSetup (Claude Opus 4.7 generating 6 backstories) can take 30–60 s
 
 var status_label: Label
 var quit_button: Button
