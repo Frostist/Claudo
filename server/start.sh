@@ -10,4 +10,7 @@ if ! command -v node >/dev/null 2>&1; then
     [ -x "$p/node" ] && export PATH="$p:$PATH" && break
   done
 fi
+# Kill any leftover server from a previous run
+lsof -ti:9876 | xargs kill -9 2>/dev/null || true
+
 exec node "$SCRIPT_DIR/dist/index.js" >> "$SCRIPT_DIR/server.log" 2>&1
