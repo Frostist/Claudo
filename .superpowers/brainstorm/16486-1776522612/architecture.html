@@ -1,0 +1,55 @@
+<h2>Architecture Approaches</h2>
+<p class="subtitle">How should Godot, the AI agents, and the Games Master connect?</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Pure Godot — HTTP calls direct from GDScript</h3>
+      <p>Godot calls Gemini & Claude APIs directly using <code>HTTPRequest</code> nodes. Each NPC stores its memory as a GDScript Dictionary. The GM is a background Godot thread polling game state.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>One codebase, no extra services</li><li>Easy to ship / no server to run</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>GDScript is painful for complex agent logic</li><li>No clean MCP interface for the GM</li><li>NPC-to-NPC comms are messy to coordinate</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Python Backend — FastAPI + WebSocket bridge ⭐ Recommended</h3>
+      <p>Godot handles rendering & input only. A local Python FastAPI server runs all agent logic — Gemini for NPCs, Claude Opus for the GM. Godot and Python talk over WebSocket for real-time updates. NPC memory = JSON files on disk. The GM reads everything via an MCP-style tool interface built into the server.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Python has first-class Anthropic & Gemini SDKs</li><li>Clean separation: Godot = game, Python = brains</li><li>MCP server is trivial to build here</li><li>NPC-to-NPC comms are just function calls</li><li>Easy to debug agent logic independently</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Player needs Python running locally alongside Godot</li><li>Two things to launch (manageable with a shell script)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Node.js Bridge — TypeScript agent server</h3>
+      <p>Same split as B but the backend is TypeScript/Node.js instead of Python. Godot ↔ Node.js over WebSocket. Uses the Anthropic TS SDK and Google Gemini JS SDK. Better if you prefer JS/TS over Python.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>TypeScript is strongly typed, great for agent state</li><li>Single JS runtime, no Python dependency</li><li>Anthropic & Gemini both have great JS SDKs</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Same two-process issue as B</li><li>Slightly less mature AI tooling ecosystem vs Python</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.08);">
+  <p class="label">How it flows (Option B/C)</p>
+  <div style="font-family:monospace;font-size:12px;line-height:2;color:var(--text-secondary,#aaa);">
+    Godot (render + input)<br>
+    &nbsp;&nbsp;↕ WebSocket<br>
+    Agent Server (Python or TS)<br>
+    &nbsp;&nbsp;├── NPC Agents → Gemini Flash/Pro<br>
+    &nbsp;&nbsp;├── Games Master → Claude Opus 4.7<br>
+    &nbsp;&nbsp;├── Memory Store (JSON files per NPC)<br>
+    &nbsp;&nbsp;└── MCP tools (read chat logs, push game events)
+  </div>
+</div>

@@ -1,0 +1,85 @@
+<h2>Visual Style</h2>
+<p class="subtitle">What art direction feels right for Claudo's top-down 2D world?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1a1a2e;padding:16px;font-family:monospace;position:relative;overflow:hidden;height:160px;">
+      <!-- Dark gothic mansion mockup -->
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);"></div>
+      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;height:100%;padding:8px;">
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(200,150,50,0.3);border-radius:2px;display:flex;align-items:center;justify-content:center;">
+          <span style="color:rgba(200,150,50,0.6);font-size:10px;">LIBRARY</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(200,150,50,0.5);border-radius:2px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:8px;height:8px;background:#e8c84a;border-radius:50%;box-shadow:0 0 6px #e8c84a;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(200,150,50,0.3);border-radius:2px;"></div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(200,150,50,0.2);border-radius:2px;grid-column:span 2;display:flex;align-items:center;justify-content:center;">
+          <span style="color:rgba(200,150,50,0.4);font-size:9px;">BALLROOM</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(200,150,50,0.3);border-radius:2px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:5px;height:5px;background:#e05c5c;border-radius:50%;box-shadow:0 0 4px #e05c5c;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Dark Gothic</h3>
+      <p>Deep navy/black palette, candlelight amber accents, mysterious atmosphere. Think shadowy Victorian manor with glowing character sprites.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f5e6c8;padding:16px;position:relative;overflow:hidden;height:160px;">
+      <!-- Cozy illustrated mockup -->
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,#f5e6c8 0%,#e8d5a3 100%);"></div>
+      <div style="position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;height:100%;padding:8px;">
+        <div style="background:rgba(139,90,43,0.15);border:2px solid rgba(139,90,43,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+          <span style="color:rgba(100,60,20,0.7);font-size:9px;font-weight:bold;">STUDY</span>
+        </div>
+        <div style="background:rgba(139,90,43,0.2);border:2px solid rgba(139,90,43,0.5);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:10px;height:10px;background:#8b5a2b;border-radius:50%;"></div>
+        </div>
+        <div style="background:rgba(139,90,43,0.1);border:2px solid rgba(139,90,43,0.3);border-radius:6px;"></div>
+        <div style="background:rgba(139,90,43,0.12);border:2px solid rgba(139,90,43,0.35);border-radius:6px;grid-column:span 2;display:flex;align-items:center;justify-content:center;">
+          <span style="color:rgba(100,60,20,0.5);font-size:9px;font-weight:bold;">DINING ROOM</span>
+        </div>
+        <div style="background:rgba(139,90,43,0.15);border:2px solid rgba(139,90,43,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:7px;height:7px;background:#c0392b;border-radius:50%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Cozy Illustrated</h3>
+      <p>Warm parchment tones, hand-drawn style, charming and slightly whimsical. Like a board game come to life — approachable and readable.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d0d0d;padding:16px;position:relative;overflow:hidden;height:160px;font-family:'Courier New',monospace;">
+      <!-- Noir pixel art mockup -->
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,#0d0d0d 0%,#1a1a1a 100%);"></div>
+      <div style="position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:2px;height:100%;padding:8px;">
+        <div style="background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#555;font-size:8px;letter-spacing:1px;">LIB</span>
+        </div>
+        <div style="background:#222;border:1px solid #444;display:flex;align-items:center;justify-content:center;">
+          <div style="width:6px;height:6px;background:#fff;"></div>
+        </div>
+        <div style="background:#1a1a1a;border:1px solid #333;"></div>
+        <div style="background:#111;border:1px solid #333;grid-column:span 2;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#444;font-size:8px;letter-spacing:2px;">BALLROOM</span>
+        </div>
+        <div style="background:#1a1a1a;border:1px solid #333;display:flex;align-items:center;justify-content:center;">
+          <div style="width:4px;height:4px;background:#e00;"></div>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:8px;right:10px;color:#333;font-size:8px;letter-spacing:1px;">NOIR</div>
+    </div>
+    <div class="card-body">
+      <h3>Pixel Noir</h3>
+      <p>Monochrome pixel art with single-color accents (red for danger, gold for clues). Gritty, retro detective aesthetic with strong contrast.</p>
+    </div>
+  </div>
+
+</div>
