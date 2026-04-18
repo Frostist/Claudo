@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://notebook"]
+
+[ext_resource type="Script" path="res://scenes/ui/notebook/notebook.gd" id="1_notebook"]
+
+[node name="Notebook" type="CanvasLayer"]
+script = ExtResource("1_notebook")
+
+[node name="Panel" type="Panel" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -175.0
+offset_right = 250.0
+offset_bottom = 175.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Title" type="Label" parent="Panel/VBoxContainer"]
+text = "Detective's Notebook"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="TabContainer" type="TabContainer" parent="Panel/VBoxContainer"]
+size_flags_vertical = 3
+
+[node name="Suspects" type="TextEdit" parent="Panel/VBoxContainer/TabContainer"]
+placeholder_text = "Write your notes here..."
+size_flags_vertical = 3
+
+[node name="Weapons" type="TextEdit" parent="Panel/VBoxContainer/TabContainer"]
+placeholder_text = "Write your notes here..."
+size_flags_vertical = 3
+
+[node name="Rooms" type="TextEdit" parent="Panel/VBoxContainer/TabContainer"]
+placeholder_text = "Write your notes here..."
+size_flags_vertical = 3

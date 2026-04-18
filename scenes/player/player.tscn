@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://claudo_player"]
+
+[ext_resource type="Script" path="res://scenes/player/player.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/player_placeholder.png" id="2_texture"]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(14, 14)
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_texture")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1_shape")
