@@ -1,7 +1,9 @@
 {
   "name": "claudo-server",
   "version": "1.0.0",
+  "private": true,
   "main": "dist/index.js",
+  "engines": { "node": ">=18" },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
