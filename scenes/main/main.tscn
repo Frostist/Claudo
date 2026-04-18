@@ -1,0 +1,64 @@
+[gd_scene load_steps=12 format=3 uid="uid://claudo_main"]
+
+[ext_resource type="Script" path="res://scenes/main/main.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/mansion/mansion.tscn" id="2_mansion"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud/hud.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notebook/notebook.tscn" id="5_notebook"]
+[ext_resource type="PackedScene" path="res://scenes/npc/npc.tscn" id="6_npc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_1.png" id="7_npc1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_2.png" id="8_npc2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_3.png" id="9_npc3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_4.png" id="10_npc4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_5.png" id="11_npc5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_6.png" id="12_npc6"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Mansion" parent="." instance=ExtResource("2_mansion")]
+
+[node name="NPCScarlett" parent="Mansion" instance=ExtResource("6_npc")]
+position = Vector2(144, 112)
+npc_name = "Miss Scarlett"
+npc_texture = ExtResource("7_npc1")
+
+[node name="NPCMustard" parent="Mansion" instance=ExtResource("6_npc")]
+position = Vector2(354, 112)
+npc_name = "Col. Mustard"
+npc_texture = ExtResource("8_npc2")
+
+[node name="NPCWhite" parent="Mansion" instance=ExtResource("6_npc")]
+position = Vector2(576, 112)
+npc_name = "Mrs. White"
+npc_texture = ExtResource("9_npc3")
+
+[node name="NPCGreen" parent="Mansion" instance=ExtResource("6_npc")]
+position = Vector2(144, 306)
+npc_name = "Rev. Green"
+npc_texture = ExtResource("10_npc4")
+
+[node name="NPCPeacock" parent="Mansion" instance=ExtResource("6_npc")]
+position = Vector2(354, 306)
+npc_name = "Mrs. Peacock"
+npc_texture = ExtResource("11_npc5")
+
+[node name="NPCPlum" parent="Mansion" instance=ExtResource("6_npc")]
+position = Vector2(576, 306)
+npc_name = "Prof. Plum"
+npc_texture = ExtResource("12_npc6")
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+position = Vector2(496, 424)
+
+[node name="Camera" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+limit_left = 0
+limit_top = 0
+limit_right = 1456
+limit_bottom = 912
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
+
+[node name="Notebook" parent="." instance=ExtResource("5_notebook")]
