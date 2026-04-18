@@ -6,7 +6,7 @@ TL;DR Someone was murdered in the mansion — your job is to find out who did it
 
 ## How it works
 
-Every new game the **Games Master** (Claude Opus) randomly assigns a murderer, weapon, and crime scene from the six suspects, six weapons, and nine rooms. It then generates a unique personality and private memory for each NPC (Google Gemini) — some witnessed something, some heard a rumour, some are just suspicious by nature.
+Every new game the **Games Master** randomly assigns a murderer, weapon, and crime scene from the six suspects, six weapons, and nine rooms. It then generates a unique personality and private memory for each **AIPC** (NPC but AI 🤖) — some witnessed something, some heard a rumour, some are just suspicious by nature.
 
 The six suspects are autonomous AI agents powered by **Google Gemini**. They walk between rooms, gossip with each other, and remember what they've been told. If NPC A tells NPC B a secret, NPC B knows it came from NPC A and may or may not pass it on depending on how much they trust them.
 
