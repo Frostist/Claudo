@@ -1,8 +1,20 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scenes/mansion/mansion.gd" id="1_mansion"]
 [ext_resource type="Script" path="res://scenes/mansion/mansion_generator.gd" id="2_generator"]
 [ext_resource type="TileSet" path="res://assets/tilesets/mansion_tileset.tres" id="3_tileset"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/kitchen_counter.png" id="4_kitchen_counter"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/piano.png" id="5_piano"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/plant_pot.png" id="6_plant_pot"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/billiard_table.png" id="7_billiard_table"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/suit_of_armor.png" id="8_suit_of_armor"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/bookshelf.png" id="9_bookshelf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/reading_chair.png" id="10_reading_chair"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/desk.png" id="11_desk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/fireplace.png" id="12_fireplace"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/armchair.png" id="13_armchair"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/dining_table.png" id="14_dining_table"]
+[ext_resource type="Texture2D" path="res://assets/sprites/furniture/candelabra.png" id="15_candelabra"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kitchen"]
 size = Vector2(288, 240)
@@ -91,3 +103,108 @@ position = Vector2(832, 712)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RoomDiningRoom"]
 shape = SubResource("RectangleShape2D_dining")
+
+[node name="FurnKitchenCounter" type="Sprite2D" parent="Mansion"]
+position = Vector2(48, 48)
+texture = ExtResource("4_kitchen_counter")
+centered = false
+
+[node name="FurnKitchenCounter2" type="Sprite2D" parent="Mansion"]
+position = Vector2(48, 80)
+texture = ExtResource("4_kitchen_counter")
+centered = false
+
+[node name="FurnBallroomPiano" type="Sprite2D" parent="Mansion"]
+position = Vector2(400, 48)
+texture = ExtResource("5_piano")
+centered = false
+
+[node name="FurnBallroomPiano2" type="Sprite2D" parent="Mansion"]
+position = Vector2(560, 48)
+texture = ExtResource("5_piano")
+centered = false
+
+[node name="FurnConservPlant1" type="Sprite2D" parent="Mansion"]
+position = Vector2(720, 32)
+texture = ExtResource("6_plant_pot")
+centered = false
+
+[node name="FurnConservPlant2" type="Sprite2D" parent="Mansion"]
+position = Vector2(752, 32)
+texture = ExtResource("6_plant_pot")
+centered = false
+
+[node name="FurnConservPlant3" type="Sprite2D" parent="Mansion"]
+position = Vector2(720, 208)
+texture = ExtResource("6_plant_pot")
+centered = false
+
+[node name="FurnBilliardTable" type="Sprite2D" parent="Mansion"]
+position = Vector2(96, 368)
+texture = ExtResource("7_billiard_table")
+centered = false
+
+[node name="FurnHallArmor" type="Sprite2D" parent="Mansion"]
+position = Vector2(384, 320)
+texture = ExtResource("8_suit_of_armor")
+centered = false
+
+[node name="FurnHallArmor2" type="Sprite2D" parent="Mansion"]
+position = Vector2(592, 320)
+texture = ExtResource("8_suit_of_armor")
+centered = false
+
+[node name="FurnLibraryShelf1" type="Sprite2D" parent="Mansion"]
+position = Vector2(704, 320)
+texture = ExtResource("9_bookshelf")
+centered = false
+
+[node name="FurnLibraryShelf2" type="Sprite2D" parent="Mansion"]
+position = Vector2(720, 320)
+texture = ExtResource("9_bookshelf")
+centered = false
+
+[node name="FurnLibraryShelf3" type="Sprite2D" parent="Mansion"]
+position = Vector2(736, 320)
+texture = ExtResource("9_bookshelf")
+centered = false
+
+[node name="FurnLibraryChair" type="Sprite2D" parent="Mansion"]
+position = Vector2(800, 400)
+texture = ExtResource("10_reading_chair")
+centered = false
+
+[node name="FurnStudyDesk" type="Sprite2D" parent="Mansion"]
+position = Vector2(96, 640)
+texture = ExtResource("11_desk")
+centered = false
+
+[node name="FurnLoungeFireplace" type="Sprite2D" parent="Mansion"]
+position = Vector2(480, 608)
+texture = ExtResource("12_fireplace")
+centered = false
+
+[node name="FurnLoungeChair1" type="Sprite2D" parent="Mansion"]
+position = Vector2(416, 656)
+texture = ExtResource("13_armchair")
+centered = false
+
+[node name="FurnLoungeChair2" type="Sprite2D" parent="Mansion"]
+position = Vector2(544, 656)
+texture = ExtResource("13_armchair")
+centered = false
+
+[node name="FurnDiningTable" type="Sprite2D" parent="Mansion"]
+position = Vector2(768, 656)
+texture = ExtResource("14_dining_table")
+centered = false
+
+[node name="FurnDiningCandle1" type="Sprite2D" parent="Mansion"]
+position = Vector2(704, 624)
+texture = ExtResource("15_candelabra")
+centered = false
+
+[node name="FurnDiningCandle2" type="Sprite2D" parent="Mansion"]
+position = Vector2(928, 624)
+texture = ExtResource("15_candelabra")
+centered = false
