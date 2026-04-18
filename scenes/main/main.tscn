@@ -20,31 +20,37 @@ script = ExtResource("1_script")
 
 [node name="NPCScarlett" parent="Mansion" instance=ExtResource("6_npc")]
 position = Vector2(144, 112)
+npc_id = "npc_scarlett"
 npc_name = "Miss Scarlett"
 npc_texture = ExtResource("7_npc1")
 
 [node name="NPCMustard" parent="Mansion" instance=ExtResource("6_npc")]
 position = Vector2(354, 112)
+npc_id = "npc_mustard"
 npc_name = "Col. Mustard"
 npc_texture = ExtResource("8_npc2")
 
 [node name="NPCWhite" parent="Mansion" instance=ExtResource("6_npc")]
 position = Vector2(576, 112)
+npc_id = "npc_white"
 npc_name = "Mrs. White"
 npc_texture = ExtResource("9_npc3")
 
 [node name="NPCGreen" parent="Mansion" instance=ExtResource("6_npc")]
 position = Vector2(144, 306)
+npc_id = "npc_green"
 npc_name = "Rev. Green"
 npc_texture = ExtResource("10_npc4")
 
 [node name="NPCPeacock" parent="Mansion" instance=ExtResource("6_npc")]
 position = Vector2(354, 306)
+npc_id = "npc_peacock"
 npc_name = "Mrs. Peacock"
 npc_texture = ExtResource("11_npc5")
 
 [node name="NPCPlum" parent="Mansion" instance=ExtResource("6_npc")]
 position = Vector2(576, 306)
+npc_id = "npc_plum"
 npc_name = "Prof. Plum"
 npc_texture = ExtResource("12_npc6")
 
