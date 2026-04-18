@@ -1,0 +1,93 @@
+extends Node
+
+signal npc_reply(npc_id: String, text: String)
+signal game_ready()
+
+const WS_URL := "ws://127.0.0.1:9876"
+const RECONNECT_INTERVAL := 3.0
+const RECONNECT_TIMEOUT := 300.0
+
+var _socket := WebSocketPeer.new()
+var _connected := false
+var _reconnecting := false
+var _connection_started := false  # guard so _process ignores socket before connect_to_server() is called
+var _reconnect_timer := 0.0
+var _reconnect_elapsed := 0.0
+
+func _ready() -> void:
+	set_process(true)
+
+func connect_to_server() -> void:
+	_connection_started = true
+	_socket.connect_to_url(WS_URL)
+
+func _process(delta: float) -> void:
+	if not _connection_started:
+		return
+	_socket.poll()
+	var state := _socket.get_ready_state()
+
+	if state == WebSocketPeer.STATE_OPEN:
+		if not _connected:
+			_connected = true
+			_reconnecting = false
+			_reconnect_timer = 0.0
+			_reconnect_elapsed = 0.0
+		while _socket.get_available_packet_count() > 0:
+			var raw := _socket.get_packet().get_string_from_utf8()
+			_handle_message(raw)
+
+	elif state == WebSocketPeer.STATE_CLOSED:
+		if _connected or not _reconnecting:
+			# Either dropped mid-game or initial connection failed — start/restart reconnect loop
+			if _connected:
+				_connected = false
+			_start_reconnect()
+		else:
+			# Already in reconnect loop — manage timer
+			_reconnect_elapsed += delta
+			_reconnect_timer += delta
+			if _reconnect_elapsed >= RECONNECT_TIMEOUT:
+				_on_reconnect_timeout()
+			elif _reconnect_timer >= RECONNECT_INTERVAL:
+				_reconnect_timer = 0.0
+				_socket = WebSocketPeer.new()
+				_socket.connect_to_url(WS_URL)
+
+func _handle_message(raw: String) -> void:
+	var json := JSON.new()
+	if json.parse(raw) != OK:
+		return
+	var msg: Dictionary = json.get_data()
+	match msg.get("event", ""):
+		"game_ready":
+			game_ready.emit()
+		"npc_reply":
+			var d: Dictionary = msg.get("data", {})
+			npc_reply.emit(d.get("npc_id", ""), d.get("text", ""))
+		"state_snapshot":
+			pass  # Phase 2+ will handle restoring state
+
+func _send(event: String, data: Dictionary) -> void:
+	if _socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+		return
+	var msg := JSON.stringify({ "event": event, "data": data })
+	_socket.send_text(msg)
+
+func send_player_chat(npc_id: String, message: String) -> void:
+	_send("player_chat", { "npc_id": npc_id, "message": message })
+
+func send_player_moved(room_name: String) -> void:
+	_send("player_moved", { "room_name": room_name })
+
+func send_notebook_updated(text: String) -> void:
+	_send("notebook_updated", { "text": text })
+
+func _start_reconnect() -> void:
+	_reconnecting = true
+	_reconnect_elapsed = 0.0
+	_reconnect_timer = RECONNECT_INTERVAL  # trigger immediately
+
+func _on_reconnect_timeout() -> void:
+	_reconnecting = false
+	get_tree().change_scene_to_file("res://scenes/main/main.tscn")

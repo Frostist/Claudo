@@ -28,6 +28,10 @@ ui_notebook={
 
 3d/physics_engine="Jolt Physics"
 
+[autoload]
+
+ServerBridge="*res://autoloads/server_bridge.gd"
+
 [rendering]
 
 rendering_device/driver.windows="d3d12"
