@@ -480,7 +480,7 @@ export class WsServer {
 cd server && npx vitest run tests/ws-server.test.ts
 ```
 
-Expected: All 5 tests pass.
+Expected: All 4 tests pass.
 
 - [ ] **Step 5: Commit**
 
@@ -596,7 +596,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { NpcId, NPC_NAMES, WEAPONS, ROOMS, ARCHETYPES, TruthFile } from "./types";
 
-const DATA_DIR = path.join(__dirname, "../../data");
+const DATA_DIR = path.join(__dirname, "../data");
 const AGENTS_DIR = path.join(DATA_DIR, "agents");
 
 interface AgentConfig {
@@ -824,7 +824,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { NpcId, ChatMessage } from "./types";
 
-const AGENTS_DIR = path.join(__dirname, "../../data/agents");
+const AGENTS_DIR = path.join(__dirname, "../data/agents");
 
 export class NpcAgent {
   private ai: GoogleGenAI;
@@ -864,7 +864,9 @@ Stay in character at all times. Respond as ${this.name} would — consistent wit
 
     const response = await this.ai.models.generateContent({
       model: "gemini-2.0-flash",
-      systemInstruction: this.systemPrompt,
+      config: {
+        systemInstruction: this.systemPrompt,
+      },
       contents,
     });
 
@@ -915,7 +917,7 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 
 // Load .env if present (development convenience — production uses env vars)
-dotenv.config({ path: path.join(__dirname, "../../.env") });
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 import { WsServer } from "./ws-server";
 import { GameState } from "./game-state";
@@ -940,16 +942,10 @@ async function main(): Promise<void> {
   const state = new GameState();
   const agents = new Map<NpcId, NpcAgent>();
 
-  // Run GM GameSetup (writes agent.md files, truth.json)
-  await runGameSetup();
-
-  // Load NPC agents from freshly written agent.md files
-  for (const [npcId, name] of Object.entries(NPC_NAMES) as [NpcId, string][]) {
-    agents.set(npcId, NpcAgent.fromAgentMd(npcId, name, process.env.GOOGLE_API_KEY!));
-  }
-
-  // Start WebSocket server
-  const ws = new WsServer(9876, async (event, data, socket) => {
+  // Start WS server FIRST so port 9876 is open before Godot's 1.5s wait expires.
+  // GameSetup takes 5–15 seconds; Godot connects while it runs, then waits for game_ready.
+  let ws: WsServer;
+  ws = new WsServer(9876, async (event, data, _socket) => {
     switch (event) {
       case "player_chat": {
         const npcId = data.npc_id as NpcId;
@@ -982,12 +978,17 @@ async function main(): Promise<void> {
     }
   });
 
-  // Send game_ready once WS is up
-  // Small delay to ensure Godot's 1.5s wait has elapsed and client is connected
-  setTimeout(() => {
-    ws.send("game_ready", { npc_names: Object.values(NPC_NAMES) });
-    console.log("[Server] game_ready sent");
-  }, 500);
+  // Run GM GameSetup (writes agent.md files, truth.json) — Godot is already connected and waiting
+  await runGameSetup();
+
+  // Load NPC agents from freshly written agent.md files
+  for (const [npcId, name] of Object.entries(NPC_NAMES) as [NpcId, string][]) {
+    agents.set(npcId, NpcAgent.fromAgentMd(npcId, name, process.env.GOOGLE_API_KEY!));
+  }
+
+  // Godot client is connected — send game_ready immediately
+  ws.send("game_ready", { npc_names: Object.values(NPC_NAMES) });
+  console.log("[Server] game_ready sent");
 }
 
 main().catch((err) => {
@@ -1087,6 +1088,7 @@ const RECONNECT_TIMEOUT := 300.0
 var _socket := WebSocketPeer.new()
 var _connected := false
 var _reconnecting := false
+var _connection_started := false  # guard so _process ignores socket before connect_to_server() is called
 var _reconnect_timer := 0.0
 var _reconnect_elapsed := 0.0
 
@@ -1094,36 +1096,41 @@ func _ready() -> void:
 	set_process(true)
 
 func connect_to_server() -> void:
+	_connection_started = true
 	_socket.connect_to_url(WS_URL)
 
 func _process(delta: float) -> void:
+	if not _connection_started:
+		return
 	_socket.poll()
 	var state := _socket.get_ready_state()
 
-	match state:
-		WebSocketPeer.STATE_OPEN:
-			if not _connected:
-				_connected = true
-				_reconnecting = false
-				_reconnect_timer = 0.0
-				_reconnect_elapsed = 0.0
-			while _socket.get_available_packet_count() > 0:
-				var raw := _socket.get_packet().get_string_from_utf8()
-				_handle_message(raw)
+	if state == WebSocketPeer.STATE_OPEN:
+		if not _connected:
+			_connected = true
+			_reconnecting = false
+			_reconnect_timer = 0.0
+			_reconnect_elapsed = 0.0
+		while _socket.get_available_packet_count() > 0:
+			var raw := _socket.get_packet().get_string_from_utf8()
+			_handle_message(raw)
 
-		WebSocketPeer.STATE_CLOSED:
+	elif state == WebSocketPeer.STATE_CLOSED:
+		if _connected or not _reconnecting:
+			# Either dropped mid-game or initial connection failed — start/restart reconnect loop
 			if _connected:
 				_connected = false
-				_start_reconnect()
-			elif _reconnecting:
-				_reconnect_elapsed += delta
-				_reconnect_timer += delta
-				if _reconnect_elapsed >= RECONNECT_TIMEOUT:
-					_on_reconnect_timeout()
-				elif _reconnect_timer >= RECONNECT_INTERVAL:
-					_reconnect_timer = 0.0
-					_socket = WebSocketPeer.new()
-					_socket.connect_to_url(WS_URL)
+			_start_reconnect()
+		else:
+			# Already in reconnect loop — manage timer
+			_reconnect_elapsed += delta
+			_reconnect_timer += delta
+			if _reconnect_elapsed >= RECONNECT_TIMEOUT:
+				_on_reconnect_timeout()
+			elif _reconnect_timer >= RECONNECT_INTERVAL:
+				_reconnect_timer = 0.0
+				_socket = WebSocketPeer.new()
+				_socket.connect_to_url(WS_URL)
 
 func _handle_message(raw: String) -> void:
 	var json := JSON.new()
@@ -1425,6 +1432,7 @@ extends Node2D
 var _server_pid := -1
 
 func _ready() -> void:
+	get_tree().auto_accept_quit = false  # required so NOTIFICATION_WM_CLOSE_REQUEST fires instead of instant quit
 	mansion.room_changed.connect(hud.update_room)
 	mansion.room_changed.connect(ServerBridge.send_player_moved)
 	_spawn_server()
@@ -1446,9 +1454,9 @@ func _notification(what: int) -> void:
 		get_tree().quit()
 ```
 
-- [ ] **Step 3: Enable close request notification**
+- [ ] **Step 3: Verify `auto_accept_quit` is set**
 
-In the Godot editor, select the `Main` node (root of `main.tscn`). In the Inspector, there's no direct toggle — this is handled automatically since `_notification` is implemented. However, ensure the project doesn't auto-quit on close: Project → Project Settings → Display → Window → `handle_input_locally` should be on (default). No change needed — `NOTIFICATION_WM_CLOSE_REQUEST` fires by default when the window close button is pressed.
+`get_tree().auto_accept_quit = false` is already set in `_ready()` above. This is required — without it, Godot quits immediately on window close without firing `NOTIFICATION_WM_CLOSE_REQUEST`, and the server process is never killed. No additional editor setting is needed.
 
 - [ ] **Step 4: Wire notebook to ServerBridge**
 
