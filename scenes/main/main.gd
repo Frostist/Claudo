@@ -13,12 +13,15 @@ func _ready() -> void:
 
 func _spawn_server() -> void:
 	var script_path := ProjectSettings.globalize_path("res://server/start.sh")
+	print("[Main] Spawning server: ", script_path)
 	_server_pid = OS.create_process("/bin/bash", [script_path])
 	if _server_pid < 0:
-		push_error("Failed to spawn server process")
+		push_error("[Main] Failed to spawn server process (OS.create_process returned -1)")
 		return
-	# Wait 1.5s for the server to start, then connect WebSocket
+	print("[Main] Server process spawned — PID: ", _server_pid)
+	# Wait 1.5s for the server to open the WebSocket port, then connect
 	await get_tree().create_timer(1.5).timeout
+	print("[Main] Connecting WebSocket to server...")
 	ServerBridge.connect_to_server()
 
 func _notification(what: int) -> void:

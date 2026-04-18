@@ -42,7 +42,9 @@ func _process(delta: float) -> void:
 	if not _active:
 		return
 	_elapsed += delta
+	status_label.text = "Starting game... (%.0fs)" % _elapsed
 	if _elapsed >= TIMEOUT:
+		print("[LoadingScreen] Timed out after ", TIMEOUT, "s — server did not send game_ready")
 		status_label.text = "Failed to start server.\nIs Node.js installed?"
 		quit_button.visible = true
 		set_process(false)

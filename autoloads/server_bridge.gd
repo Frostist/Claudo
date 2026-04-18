@@ -19,6 +19,7 @@ func _ready() -> void:
 
 func connect_to_server() -> void:
 	_connection_started = true
+	print("[ServerBridge] Connecting to ", WS_URL)
 	_socket.connect_to_url(WS_URL)
 
 func _process(delta: float) -> void:
@@ -33,6 +34,7 @@ func _process(delta: float) -> void:
 			_reconnecting = false
 			_reconnect_timer = 0.0
 			_reconnect_elapsed = 0.0
+			print("[ServerBridge] Connected to server")
 		while _socket.get_available_packet_count() > 0:
 			var raw := _socket.get_packet().get_string_from_utf8()
 			_handle_message(raw)
@@ -41,7 +43,10 @@ func _process(delta: float) -> void:
 		if _connected or not _reconnecting:
 			# Either dropped mid-game or initial connection failed — start/restart reconnect loop
 			if _connected:
+				print("[ServerBridge] Connection dropped — starting reconnect loop")
 				_connected = false
+			else:
+				print("[ServerBridge] Initial connection failed — retrying every ", RECONNECT_INTERVAL, "s")
 			_start_reconnect()
 		else:
 			# Already in reconnect loop — manage timer
@@ -57,8 +62,10 @@ func _process(delta: float) -> void:
 func _handle_message(raw: String) -> void:
 	var json := JSON.new()
 	if json.parse(raw) != OK:
+		push_warning("[ServerBridge] Received unparseable message: ", raw.left(100))
 		return
 	var msg: Dictionary = json.get_data()
+	print("[ServerBridge] Received event: ", msg.get("event", "unknown"))
 	match msg.get("event", ""):
 		"game_ready":
 			game_ready.emit()
