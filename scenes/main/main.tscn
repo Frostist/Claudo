@@ -51,7 +51,8 @@ npc_texture = ExtResource("12_npc6")
 [node name="Player" parent="." instance=ExtResource("3_player")]
 position = Vector2(496, 424)
 
-[node name="Camera" type="Camera2D" parent="."]
+[node name="Camera" type="Camera2D" parent="Player"]
+zoom = Vector2(4, 4)
 position_smoothing_enabled = true
 position_smoothing_speed = 5.0
 limit_left = 0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://notebook"]
+[gd_scene format=3 uid="uid://notebook"]
 
 [ext_resource type="Script" path="res://scenes/ui/notebook/notebook.gd" id="1_notebook"]
 
