@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://claudo_main"]
+[gd_scene load_steps=14 format=3 uid="uid://claudo_main"]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/mansion/mansion.tscn" id="2_mansion"]
@@ -12,6 +12,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_4.png" id="10_npc4"]
 [ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_5.png" id="11_npc5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_6.png" id="12_npc6"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loading/loading_screen.tscn" id="13_loading"]
+[ext_resource type="PackedScene" path="res://scenes/ui/chat/chat_window.tscn" id="14_chat"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_script")
@@ -69,3 +71,8 @@ limit_bottom = 912
 [node name="HUD" parent="." instance=ExtResource("4_hud")]
 
 [node name="Notebook" parent="." instance=ExtResource("5_notebook")]
+
+[node name="LoadingScreen" parent="." instance=ExtResource("13_loading")]
+
+[node name="ChatWindow" parent="." instance=ExtResource("14_chat")]
+groups = ["chat_window"]
