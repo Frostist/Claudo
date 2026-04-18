@@ -1,0 +1,93 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scenes/mansion/mansion.gd" id="1_mansion"]
+[ext_resource type="Script" path="res://scenes/mansion/mansion_generator.gd" id="2_generator"]
+[ext_resource type="TileSet" path="res://assets/tilesets/mansion_tileset.tres" id="3_tileset"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kitchen"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ballroom"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_conservatory"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_billiard"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hall"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_library"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_study"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lounge"]
+size = Vector2(288, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dining"]
+size = Vector2(288, 240)
+
+[node name="Mansion" type="Node2D"]
+script = ExtResource("1_mansion")
+
+[node name="MansionTiles" type="TileMapLayer" parent="."]
+tile_set = ExtResource("3_tileset")
+script = ExtResource("2_generator")
+
+[node name="RoomKitchen" type="Area2D" parent="."]
+position = Vector2(160, 136)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomKitchen"]
+shape = SubResource("RectangleShape2D_kitchen")
+
+[node name="RoomBallroom" type="Area2D" parent="."]
+position = Vector2(496, 136)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomBallroom"]
+shape = SubResource("RectangleShape2D_ballroom")
+
+[node name="RoomConservatory" type="Area2D" parent="."]
+position = Vector2(832, 136)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomConservatory"]
+shape = SubResource("RectangleShape2D_conservatory")
+
+[node name="RoomBilliardRoom" type="Area2D" parent="."]
+position = Vector2(160, 424)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomBilliardRoom"]
+shape = SubResource("RectangleShape2D_billiard")
+
+[node name="RoomHall" type="Area2D" parent="."]
+position = Vector2(496, 424)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomHall"]
+shape = SubResource("RectangleShape2D_hall")
+
+[node name="RoomLibrary" type="Area2D" parent="."]
+position = Vector2(832, 424)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomLibrary"]
+shape = SubResource("RectangleShape2D_library")
+
+[node name="RoomStudy" type="Area2D" parent="."]
+position = Vector2(160, 712)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomStudy"]
+shape = SubResource("RectangleShape2D_study")
+
+[node name="RoomLounge" type="Area2D" parent="."]
+position = Vector2(496, 712)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomLounge"]
+shape = SubResource("RectangleShape2D_lounge")
+
+[node name="RoomDiningRoom" type="Area2D" parent="."]
+position = Vector2(832, 712)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomDiningRoom"]
+shape = SubResource("RectangleShape2D_dining")
