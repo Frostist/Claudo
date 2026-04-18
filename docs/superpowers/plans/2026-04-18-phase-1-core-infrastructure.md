@@ -1215,7 +1215,7 @@ Panel anchor preset: Full Rect.
 ```gdscript
 extends CanvasLayer
 
-const TIMEOUT := 10.0
+const TIMEOUT := 30.0  # GM GameSetup (Claude Opus call) can take 5–15 s; 30 s provides headroom
 
 @onready var status_label: Label = $Panel/StatusLabel
 @onready var quit_button: Button = $Panel/QuitButton
@@ -1460,32 +1460,33 @@ func _notification(what: int) -> void:
 
 - [ ] **Step 4: Wire notebook to ServerBridge**
 
-Open `scenes/ui/notebook/notebook.gd`. Add a connection so every keystroke sends the notebook content to the server. Modify the file:
+Do **not** replace `notebook.gd` wholesale — the existing file has CLAUDE.md-documented behaviour (TextEdit focus guard, backdrop click-to-close, `gui_release_focus` on close) that must be preserved.
+
+Instead, add three things to the existing file:
+
+**a)** Add three `@onready` declarations at the top of the file. The exact node paths depend on your actual scene tree — open `scenes/ui/notebook/notebook.tscn` in Godot and check the node names under the `TabContainer` before adding these:
 
 ```gdscript
-extends CanvasLayer
-
-@onready var panel: Panel = $Panel
 @onready var suspects_edit: TextEdit = $Panel/VBoxContainer/TabContainer/Suspects
 @onready var weapons_edit: TextEdit = $Panel/VBoxContainer/TabContainer/Weapons
 @onready var rooms_edit: TextEdit = $Panel/VBoxContainer/TabContainer/Rooms
+```
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_notebook"):
-		panel.visible = !panel.visible
-		get_viewport().set_input_as_handled()
+**b)** In the existing `_ready()` function, append the signal connections:
 
-func _ready() -> void:
-	suspects_edit.text_changed.connect(_on_text_changed)
-	weapons_edit.text_changed.connect(_on_text_changed)
-	rooms_edit.text_changed.connect(_on_text_changed)
+```gdscript
+suspects_edit.text_changed.connect(_on_notebook_changed)
+weapons_edit.text_changed.connect(_on_notebook_changed)
+rooms_edit.text_changed.connect(_on_notebook_changed)
+```
 
-func _on_text_changed() -> void:
+**c)** Add the handler at the bottom of the file:
+
+```gdscript
+func _on_notebook_changed() -> void:
 	var combined := suspects_edit.text + "\n" + weapons_edit.text + "\n" + rooms_edit.text
 	ServerBridge.send_notebook_updated(combined)
 ```
-
-> **Note:** The `@onready` paths above assume the notebook scene structure from Phase 0. Verify the node names match your actual scene tree before saving.
 
 - [ ] **Step 5: Commit**
 
