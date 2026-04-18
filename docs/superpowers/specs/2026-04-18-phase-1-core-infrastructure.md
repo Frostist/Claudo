@@ -27,7 +27,7 @@ server/
 └── dist/                 compiled JS (committed)
 ```
 
-**Dependencies:** `ws`, `@anthropic-ai/sdk`, `@google/generative-ai`, `typescript`, `tsx` (dev)
+**Dependencies:** `ws`, `@anthropic-ai/sdk`, `@google/genai`, `typescript`, `tsx` (dev)
 
 **Runtime prerequisite:** Node.js installed on the player's machine.
 
@@ -69,7 +69,7 @@ func send_notebook_updated(text: String) -> void
 All outbound messages are JSON: `{ "event": "<type>", "data": { ... } }`.  
 All inbound messages follow the same envelope.
 
-**Reconnection:** If the WebSocket drops mid-game, `ServerBridge` displays a "Connection lost — reconnecting…" overlay with a 5-minute countdown (reconnect attempt every 3 seconds). On success, it sends a `reconnect` event and the server responds with a full state snapshot. On timeout, Godot returns to the main menu.
+**Reconnection:** If the WebSocket drops mid-game (transient network drop — not a server process crash), `ServerBridge` displays a "Connection lost — reconnecting…" overlay with a 5-minute countdown (reconnect attempt every 3 seconds). On success, it sends a `reconnect` event and the server responds with a `state_snapshot`. On timeout, Godot returns to the main menu. Server process crashes are not recoverable in Phase 1 — the player must restart the game.
 
 **Registered as autoload** in Project Settings so all scenes can call `ServerBridge.send_player_chat(...)` directly.
 
@@ -92,7 +92,7 @@ All inbound messages follow the same envelope.
 |-------|---------|-------------|
 | `game_ready` | `{ npc_names: string[] }` | GM setup complete |
 | `npc_reply` | `{ npc_id, text }` | NPC response to player |
-| `state_snapshot` | `{ ... }` | Full state on reconnect |
+| `state_snapshot` | `{ npc_chat_histories: { [npc_id: string]: { role: "user" \| "model", text: string }[] }, active_npc_id: string \| null }` | Full state on reconnect (transient WebSocket drop only — not server process restart) |
 
 ---
 
@@ -138,19 +138,46 @@ On `player_chat` event:
 
 `gm-agent.ts` runs one task in Phase 1: `GameSetup`.
 
+### NPC names and archetypes
+
+NPC names are fixed — they match the canonical Cluedo set used throughout the codebase. The GM assigns archetypes, backstories, and relationships within these fixed names.
+
+| NPC ID | Name | Archetype |
+|--------|------|-----------|
+| `npc_scarlett` | Miss Scarlett | assigned by GM |
+| `npc_mustard` | Col. Mustard | assigned by GM |
+| `npc_white` | Mrs. White | assigned by GM |
+| `npc_green` | Rev. Green | assigned by GM |
+| `npc_peacock` | Mrs. Peacock | assigned by GM |
+| `npc_plum` | Prof. Plum | assigned by GM |
+
+The six archetypes the GM must assign one-per-NPC:
+
+| Archetype | Behaviour |
+|-----------|-----------|
+| **The Liar** | Assigned exclusively to the murderer. Knows the truth; actively deflects. |
+| **The Gossip** | Shares freely but often inaccurate or embellished. |
+| **The Recluse** | Rarely speaks; information they share is highly reliable. |
+| **The Witness** | Saw something relevant; doesn't know its significance. |
+| **The Protector** | Loyal to another NPC; will cover for them. |
+| **The Red Herring** | Behaves suspiciously but is innocent. |
+
+**Critical constraint:** The murderer NPC must be assigned `The Liar` archetype. The GM prompt must enforce this explicitly.
+
 ### GameSetup sequence
 
 1. Server starts → `gm-agent.ts` initialises Claude Opus 4.7 client
-2. GM call: given the six NPC archetypes and names, randomly assign:
-   - Murderer (one of the six NPCs)
-   - Weapon (one of the six classic weapons)
+2. On startup, `server/data/agents/` is cleared: any existing `agent.md` files are made writable (`chmod 644`) then deleted before new ones are written
+3. GM call: given the fixed NPC names and archetype list, randomly assign:
+   - Murderer (one of the six NPCs) — must receive `The Liar` archetype
+   - Weapon (one of: Candlestick, Knife, Lead Pipe, Revolver, Rope, Wrench)
    - Room (one of the nine rooms)
-3. GM generates six `agent.md` files — one per NPC — each containing:
+4. GM generates six `agent.md` files — one per NPC — each containing:
    - Name, archetype, one-paragraph backstory, relationship seeds with other NPCs
    - Murderer NPC gets additional context about the crime (never revealed to player directly)
-4. Files written to `server/data/agents/` then marked read-only (`chmod 444`)
-5. Ground truth written to `server/data/truth.json` (never sent to Godot)
-6. Server sends `game_ready` to Godot
+5. Files written to `server/data/agents/` then marked read-only (`chmod 444`)
+6. Ground truth written to `server/data/truth.json` (never sent to Godot)
+7. Server sends `game_ready` to Godot
 
 ### agent.md format
 
@@ -182,7 +209,7 @@ server/data/
 └── truth.json            { murderer, weapon, room }
 ```
 
-`server/data/` is gitignored — generated fresh on each "New Game".
+`server/data/` is gitignored — generated fresh on each server start. On startup, the server clears `server/data/agents/` before GameSetup runs (chmod 644 then delete any existing files), so stale read-only files from a previous run never block a new game.
 
 ---
 
