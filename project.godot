@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 config/main_scene="res://scenes/main/main.tscn"
 
+[autoload]
+
+ServerBridge="*res://autoloads/server_bridge.gd"
+
 [input]
 
 ui_notebook={
@@ -27,10 +31,6 @@ ui_notebook={
 [physics]
 
 3d/physics_engine="Jolt Physics"
-
-[autoload]
-
-ServerBridge="*res://autoloads/server_bridge.gd"
 
 [rendering]
 
