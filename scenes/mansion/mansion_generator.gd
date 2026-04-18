@@ -24,6 +24,20 @@ const FLOOR = Vector2i(0, 0)
 const WALL  = Vector2i(1, 0)
 const DOOR  = Vector2i(2, 0)
 
+const ROOM_FLOORS := {
+	"RoomKitchen":      Vector2i(3, 0),
+	"RoomBallroom":     Vector2i(4, 0),
+	"RoomConservatory": Vector2i(5, 0),
+	"RoomBilliardRoom": Vector2i(6, 0),
+	"RoomHall":         Vector2i(7, 0),
+	"RoomLibrary":      Vector2i(8, 0),
+	"RoomStudy":        Vector2i(9, 0),
+	"RoomLounge":       Vector2i(10, 0),
+	"RoomDiningRoom":   Vector2i(11, 0),
+}
+
+const CORRIDOR_FLOOR := Vector2i(7, 0)
+
 func _ready() -> void:
 	_generate_mansion()
 
@@ -33,7 +47,7 @@ func _generate_mansion() -> void:
 	for room in ROOMS:
 		var gx: int = room[0]
 		var gy: int = room[1]
-		_draw_room(gx * STEP_X, gy * STEP_Y)
+		_draw_room(gx * STEP_X, gy * STEP_Y, ROOM_FLOORS[room[2]])
 	# Draw corridors between horizontally adjacent rooms (same row)
 	for gy in range(3):
 		for gx in range(2):  # gaps between col 0-1 and col 1-2
@@ -43,40 +57,38 @@ func _generate_mansion() -> void:
 		for gy in range(2):  # gaps between row 0-1 and row 1-2
 			_draw_v_corridor(gx, gy)
 
-func _draw_room(tx: int, ty: int) -> void:
+func _draw_room(tx: int, ty: int, floor_tile: Vector2i) -> void:
 	# Fill entire block with walls
 	for x in range(BLOCK_W):
 		for y in range(BLOCK_H):
 			set_cell(Vector2i(tx + x, ty + y), 0, WALL)
-	# Fill interior with floor
+	# Fill interior with room-specific floor
 	for x in range(1, BLOCK_W - 1):
 		for y in range(1, BLOCK_H - 1):
-			set_cell(Vector2i(tx + x, ty + y), 0, FLOOR)
+			set_cell(Vector2i(tx + x, ty + y), 0, floor_tile)
 
 func _draw_h_corridor(gx: int, gy: int) -> void:
-	# Horizontal corridor: gap tile column between col gx and gx+1, at row gy
-	var gap_x: int = (gx + 1) * STEP_X - 1  # the 1-tile gap column
+	var gap_x: int = (gx + 1) * STEP_X - 1
 	var room_y: int = gy * STEP_Y
-	# Door opening: rows 7, 8, 9 within the block (centre of 17-tall room)
+	# Fill entire gap column with wall so no empty cells exist
+	for dy in range(BLOCK_H):
+		set_cell(Vector2i(gap_x, room_y + dy), 0, WALL)
+	# Punch door opening at centre rows
 	for dy in [7, 8, 9]:
 		var ty = room_y + dy
-		# Replace wall on right edge of left room with door
 		set_cell(Vector2i(gap_x - 1, ty), 0, DOOR)
-		# Fill the gap tile as floor (walkable corridor)
-		set_cell(Vector2i(gap_x, ty), 0, FLOOR)
-		# Replace wall on left edge of right room with door
+		set_cell(Vector2i(gap_x, ty), 0, CORRIDOR_FLOOR)
 		set_cell(Vector2i(gap_x + 1, ty), 0, DOOR)
 
 func _draw_v_corridor(gx: int, gy: int) -> void:
-	# Vertical corridor: gap tile row between row gy and gy+1, at col gx
-	var gap_y: int = (gy + 1) * STEP_Y - 1  # the 1-tile gap row
+	var gap_y: int = (gy + 1) * STEP_Y - 1
 	var room_x: int = gx * STEP_X
-	# Door opening: cols 9, 10, 11 within the block (centre of 20-wide room)
+	# Fill entire gap row with wall so no empty cells exist
+	for dx in range(BLOCK_W):
+		set_cell(Vector2i(room_x + dx, gap_y), 0, WALL)
+	# Punch door opening at centre columns
 	for dx in [9, 10, 11]:
 		var tx = room_x + dx
-		# Replace wall on bottom edge of top room with door
 		set_cell(Vector2i(tx, gap_y - 1), 0, DOOR)
-		# Fill the gap tile as floor
-		set_cell(Vector2i(tx, gap_y), 0, FLOOR)
-		# Replace wall on top edge of bottom room with door
+		set_cell(Vector2i(tx, gap_y), 0, CORRIDOR_FLOOR)
 		set_cell(Vector2i(tx, gap_y + 1), 0, DOOR)
