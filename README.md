@@ -1,6 +1,8 @@
 # Claudo
 
-A 2D top-down murder mystery game built in Godot 4.6. Someone was murdered in the mansion — your job is to find out who did it, with what weapon, and in which room.
+A 2D top-down murder mystery game built in Godot 4.6. 
+
+TL;DR Someone was murdered in the mansion — your job is to find out who did it, with what weapon, and in which room.
 
 ## How it works
 
