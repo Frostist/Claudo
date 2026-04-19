@@ -1,31 +1,51 @@
 # Claudo
 
-A 2D top-down murder mystery game built in Godot 4.6. 
+Claudo is a 2D top-down murder mystery game built with Godot 4.6.
 
-TL;DR Someone was murdered in the mansion — your job is to find out who did it, with what weapon, and in which room.
+Someone was murdered in the mansion. Your job is to find out who did it, with what weapon, and in which room.
+
+## Current state
+
+The project is in active phased development:
+
+- Phase 0: graphical draft (done)
+- Phase 1: core infrastructure (done)
+- Phase 2+: NPC intelligence, GM pressure systems, and accusation flow (in progress)
 
 ## How it works
 
-Every new game the **Games Master** randomly assigns a murderer, weapon, and crime scene from the six suspects, six weapons, and nine rooms. It then generates a unique personality and private memory for each **AIPC** (NPC but AI 🤖) — some witnessed something, some heard a rumour, some are just suspicious by nature.
+- On each run, a Games Master service generates a fresh murder scenario.
+- Six suspect NPCs are instantiated with generated archetypes and backstories.
+- Godot runs the game client while a local Node.js/TypeScript server handles AI and game-state logic over WebSocket.
 
-The six suspects are autonomous AI agents powered by **Google Gemini**. They walk between rooms, gossip with each other, and remember what they've been told. If NPC A tells NPC B a secret, NPC B knows it came from NPC A and may or may not pass it on depending on how much they trust them.
+## Controls
 
-The Games Master watches your progress in the background. If you're getting too close to the truth too quickly, it may send a spy to silence one of the suspects — so don't drag your feet.
-
-## How to play
-
-- **Walk** around the mansion with WASD or arrow keys
-- **Talk** to a suspect by clicking the speech bubble above their head — then type freely to interrogate them
-- **Take notes** in your detective notebook (`N` to open/close) — three pages: Suspects, Weapons, Rooms
-- **Solve the case** by heading to the Accusation Room and filing your answer — one shot, no take-backs
+- Move: `WASD` or arrow keys
+- Start chat with nearest NPC: `C`
+- Close chat window: `Esc`
+- Toggle notebook: `N`
 
 ## Tech stack
 
-- **Godot 4.6** — game engine, rendering, input
-- **Node.js / TypeScript** — AI agent server (runs locally alongside the game)
-- **Google Gemini Flash** — powers the NPC suspects
-- **Claude Opus 4.7** — the Games Master
+- `Godot 4.6` (GDScript)
+- `Node.js >= 18` + TypeScript
+- `@anthropic-ai/sdk` (GM setup generation)
+- `@google/genai` (NPC chat responses)
+- `ws` (Godot ↔ server transport)
+
+## Requirements
+
+- Godot 4.6 installed
+- Node.js 18+ installed
+- API keys in `server/.env`:
+  - `ANTHROPIC_API_KEY`
+  - `GOOGLE_API_KEY`
+
+You can copy `server/.env.example` to `server/.env` and fill in your keys.
 
 ## Running
 
-Open the project in Godot 4.6 and press **F5**.
+1. Open the project in Godot 4.6.
+2. Press `F5`.
+
+`scenes/main/main.gd` automatically spawns `server/start.sh`, which launches `server/dist/index.js` and logs to `server/server.log`.
