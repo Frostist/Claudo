@@ -64,6 +64,7 @@ Stay in character at all times. Respond as ${this.name} would — consistent wit
             role: m.role,
             parts: [{ text: m.text }],
         }));
+        console.log(`[NPC:${this.npcId}] >>> Gemini API request — model: gemini-2.0-flash, history turns: ${this.history.length}, message: "${playerMessage}"`);
         const response = await this.ai.models.generateContent({
             model: "gemini-2.0-flash",
             config: {
@@ -72,6 +73,7 @@ Stay in character at all times. Respond as ${this.name} would — consistent wit
             contents,
         });
         const replyText = response.text ?? "...";
+        console.log(`[NPC:${this.npcId}] <<< Gemini API response: "${replyText}"`);
         this.history.push({ role: "model", text: replyText });
         return replyText;
     }

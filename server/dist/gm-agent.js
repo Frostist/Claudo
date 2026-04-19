@@ -135,12 +135,16 @@ async function runGameSetup() {
         throw new Error("ANTHROPIC_API_KEY not set");
     const client = new sdk_1.default({ apiKey });
     console.log("[GM] Running GameSetup…");
+    const prompt = buildGameSetupPrompt();
+    console.log(`[GM] >>> Claude API request — model: claude-opus-4-7, max_tokens: 4096, prompt length: ${prompt.length} chars`);
     const message = await client.messages.create({
         model: "claude-opus-4-7",
         max_tokens: 4096,
-        messages: [{ role: "user", content: buildGameSetupPrompt() }],
+        messages: [{ role: "user", content: prompt }],
     });
     const rawText = message.content.find((c) => c.type === "text")?.text ?? "";
+    console.log(`[GM] <<< Claude API response — stop_reason: ${message.stop_reason}, usage: ${JSON.stringify(message.usage)}, response length: ${rawText.length} chars`);
+    console.log(`[GM] <<< Raw response (first 500 chars): ${rawText.slice(0, 500)}`);
     const result = parseGameSetupResponse(rawText);
     await clearAgentsDir();
     // Write agent.md files

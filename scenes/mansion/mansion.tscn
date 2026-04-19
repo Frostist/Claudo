@@ -104,107 +104,107 @@ position = Vector2(832, 712)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RoomDiningRoom"]
 shape = SubResource("RectangleShape2D_dining")
 
-[node name="FurnKitchenCounter" type="Sprite2D" parent="Mansion"]
+[node name="FurnKitchenCounter" type="Sprite2D" parent="."]
 position = Vector2(48, 48)
 texture = ExtResource("4_kitchen_counter")
 centered = false
 
-[node name="FurnKitchenCounter2" type="Sprite2D" parent="Mansion"]
+[node name="FurnKitchenCounter2" type="Sprite2D" parent="."]
 position = Vector2(48, 80)
 texture = ExtResource("4_kitchen_counter")
 centered = false
 
-[node name="FurnBallroomPiano" type="Sprite2D" parent="Mansion"]
+[node name="FurnBallroomPiano" type="Sprite2D" parent="."]
 position = Vector2(400, 48)
 texture = ExtResource("5_piano")
 centered = false
 
-[node name="FurnBallroomPiano2" type="Sprite2D" parent="Mansion"]
+[node name="FurnBallroomPiano2" type="Sprite2D" parent="."]
 position = Vector2(560, 48)
 texture = ExtResource("5_piano")
 centered = false
 
-[node name="FurnConservPlant1" type="Sprite2D" parent="Mansion"]
+[node name="FurnConservPlant1" type="Sprite2D" parent="."]
 position = Vector2(720, 32)
 texture = ExtResource("6_plant_pot")
 centered = false
 
-[node name="FurnConservPlant2" type="Sprite2D" parent="Mansion"]
+[node name="FurnConservPlant2" type="Sprite2D" parent="."]
 position = Vector2(752, 32)
 texture = ExtResource("6_plant_pot")
 centered = false
 
-[node name="FurnConservPlant3" type="Sprite2D" parent="Mansion"]
+[node name="FurnConservPlant3" type="Sprite2D" parent="."]
 position = Vector2(720, 208)
 texture = ExtResource("6_plant_pot")
 centered = false
 
-[node name="FurnBilliardTable" type="Sprite2D" parent="Mansion"]
+[node name="FurnBilliardTable" type="Sprite2D" parent="."]
 position = Vector2(96, 368)
 texture = ExtResource("7_billiard_table")
 centered = false
 
-[node name="FurnHallArmor" type="Sprite2D" parent="Mansion"]
+[node name="FurnHallArmor" type="Sprite2D" parent="."]
 position = Vector2(384, 320)
 texture = ExtResource("8_suit_of_armor")
 centered = false
 
-[node name="FurnHallArmor2" type="Sprite2D" parent="Mansion"]
+[node name="FurnHallArmor2" type="Sprite2D" parent="."]
 position = Vector2(592, 320)
 texture = ExtResource("8_suit_of_armor")
 centered = false
 
-[node name="FurnLibraryShelf1" type="Sprite2D" parent="Mansion"]
+[node name="FurnLibraryShelf1" type="Sprite2D" parent="."]
 position = Vector2(704, 320)
 texture = ExtResource("9_bookshelf")
 centered = false
 
-[node name="FurnLibraryShelf2" type="Sprite2D" parent="Mansion"]
+[node name="FurnLibraryShelf2" type="Sprite2D" parent="."]
 position = Vector2(720, 320)
 texture = ExtResource("9_bookshelf")
 centered = false
 
-[node name="FurnLibraryShelf3" type="Sprite2D" parent="Mansion"]
+[node name="FurnLibraryShelf3" type="Sprite2D" parent="."]
 position = Vector2(736, 320)
 texture = ExtResource("9_bookshelf")
 centered = false
 
-[node name="FurnLibraryChair" type="Sprite2D" parent="Mansion"]
+[node name="FurnLibraryChair" type="Sprite2D" parent="."]
 position = Vector2(800, 400)
 texture = ExtResource("10_reading_chair")
 centered = false
 
-[node name="FurnStudyDesk" type="Sprite2D" parent="Mansion"]
+[node name="FurnStudyDesk" type="Sprite2D" parent="."]
 position = Vector2(96, 640)
 texture = ExtResource("11_desk")
 centered = false
 
-[node name="FurnLoungeFireplace" type="Sprite2D" parent="Mansion"]
+[node name="FurnLoungeFireplace" type="Sprite2D" parent="."]
 position = Vector2(480, 608)
 texture = ExtResource("12_fireplace")
 centered = false
 
-[node name="FurnLoungeChair1" type="Sprite2D" parent="Mansion"]
+[node name="FurnLoungeChair1" type="Sprite2D" parent="."]
 position = Vector2(416, 656)
 texture = ExtResource("13_armchair")
 centered = false
 
-[node name="FurnLoungeChair2" type="Sprite2D" parent="Mansion"]
+[node name="FurnLoungeChair2" type="Sprite2D" parent="."]
 position = Vector2(544, 656)
 texture = ExtResource("13_armchair")
 centered = false
 
-[node name="FurnDiningTable" type="Sprite2D" parent="Mansion"]
+[node name="FurnDiningTable" type="Sprite2D" parent="."]
 position = Vector2(768, 656)
 texture = ExtResource("14_dining_table")
 centered = false
 
-[node name="FurnDiningCandle1" type="Sprite2D" parent="Mansion"]
+[node name="FurnDiningCandle1" type="Sprite2D" parent="."]
 position = Vector2(704, 624)
 texture = ExtResource("15_candelabra")
 centered = false
 
-[node name="FurnDiningCandle2" type="Sprite2D" parent="Mansion"]
+[node name="FurnDiningCandle2" type="Sprite2D" parent="."]
 position = Vector2(928, 624)
 texture = ExtResource("15_candelabra")
 centered = false
