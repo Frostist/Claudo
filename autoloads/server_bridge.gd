@@ -78,8 +78,7 @@ func _handle_message(raw: String) -> void:
 			print("[ServerBridge] <<< NPC reply from ", npc_id, ": ", text)
 			npc_reply.emit(npc_id, text)
 		"npc_moved":
-			var d: Dictionary = msg.get("data", {})
-			npc_moved.emit(d.get("npc_id", ""), d.get("room_name", ""))
+			npc_moved.emit(data.get("npc_id", ""), data.get("room_name", ""))
 		"state_snapshot":
 			pass  # Phase 2+ will handle restoring state
 		_:
