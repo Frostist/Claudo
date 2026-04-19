@@ -42,6 +42,9 @@ const game_state_1 = require("./game-state");
 const npc_agent_1 = require("./npc-agent");
 const gm_agent_1 = require("./gm-agent");
 const types_1 = require("./types");
+const autonomy_loop_1 = require("./autonomy-loop");
+const memory_store_1 = require("./memory-store");
+const npc_conversation_1 = require("./npc-conversation");
 function checkEnv() {
     const missing = [];
     if (!process.env.ANTHROPIC_API_KEY)
@@ -69,9 +72,20 @@ async function main() {
                 const agent = agents.get(npcId);
                 if (!agent)
                     break;
+                if (agent.isBusy) {
+                    ws.send("npc_reply", { npc_id: npcId, text: "[They are currently occupied — try again in a moment.]" });
+                    break;
+                }
+                state.activeNpcId = npcId;
                 state.appendMessage(npcId, { role: "user", text: message });
+                try {
+                    const graph = memory_store_1.MemoryStore.read(npcId);
+                    agent.setMemoryContext(graph);
+                }
+                catch { /* memory not yet written — shouldn't happen post-setup */ }
                 const reply = await agent.chat(message);
                 state.appendMessage(npcId, { role: "model", text: reply });
+                state.activeNpcId = null;
                 ws.send("npc_reply", { npc_id: npcId, text: reply });
                 break;
             }
@@ -95,6 +109,58 @@ async function main() {
     for (const [npcId, name] of Object.entries(types_1.NPC_NAMES)) {
         agents.set(npcId, npc_agent_1.NpcAgent.fromAgentMd(npcId, name, process.env.GOOGLE_API_KEY));
     }
+    // Track in-progress NPC↔NPC conversations to prevent double-triggering
+    const conversationsInProgress = new Set();
+    function conversationKey(a, b) {
+        return [a, b].sort().join("+");
+    }
+    async function maybeStartConversation(arrivedNpc, room) {
+        const others = state.getNpcsInRoom(room).filter(id => id !== arrivedNpc);
+        if (others.length === 0)
+            return;
+        // Pick a partner. conversationsInProgress guards against double-triggering when two
+        // NPCs arrive simultaneously — both ticks hit the has(key) check before any await.
+        const partner = others.sort()[0];
+        const agentA = agents.get(arrivedNpc);
+        const agentB = agents.get(partner);
+        if (!agentA || !agentB)
+            return;
+        if (agentA.isBusy || agentB.isBusy)
+            return;
+        // Spec: if the player is chatting with ANY NPC in this room, the arriving NPC idles
+        const activeId = state.activeNpcId;
+        if (activeId && state.getNpcRoom(activeId) === room)
+            return;
+        const key = conversationKey(arrivedNpc, partner);
+        if (conversationsInProgress.has(key))
+            return;
+        conversationsInProgress.add(key);
+        agentA.isBusy = true;
+        agentB.isBusy = true;
+        try {
+            console.log(`[Conversation] ${arrivedNpc} ↔ ${partner} in ${room}`);
+            const graphA = memory_store_1.MemoryStore.read(arrivedNpc);
+            const graphB = memory_store_1.MemoryStore.read(partner);
+            const result = await (0, npc_conversation_1.runNpcConversation)(arrivedNpc, partner, graphA, graphB, process.env.GOOGLE_API_KEY);
+            const lines = result.transcript.map(t => `${types_1.NPC_NAMES[t.speaker]}: ${t.text}`).join("\n");
+            state.recordNpcConversation(arrivedNpc, partner, room, lines); // in-memory log; Phase 3 GM reads via state
+            ws.send("npc_chat_npc", { npc_a: arrivedNpc, npc_b: partner, room, transcript: lines });
+        }
+        catch (err) {
+            console.error("[Conversation] Error:", err);
+        }
+        finally {
+            agentA.isBusy = false;
+            agentB.isBusy = false;
+            conversationsInProgress.delete(key);
+        }
+    }
+    const loop = new autonomy_loop_1.AutonomyLoop((npcId) => state.getNpcRoom(npcId), (npcId, room) => state.setNpcRoom(npcId, room), async (npcId, room) => {
+        ws.send("npc_moved", { npc_id: npcId, room_name: room });
+        await maybeStartConversation(npcId, room);
+    }, (npcId) => agents.get(npcId)?.isBusy ?? false);
+    loop.start(Object.keys(types_1.NPC_NAMES));
+    console.log("[Server] Autonomy loop started");
     // Godot client is connected — send game_ready immediately
     ws.send("game_ready", { npc_names: Object.values(types_1.NPC_NAMES) });
     console.log("[Server] game_ready sent");

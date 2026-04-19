@@ -37,6 +37,7 @@ exports.NpcAgent = void 0;
 const genai_1 = require("@google/genai");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const types_1 = require("./types");
 const AGENTS_DIR = path.join(__dirname, "../data/agents");
 class NpcAgent {
     constructor(npcId, name, archetype, backstory, apiKey) {
@@ -45,6 +46,7 @@ class NpcAgent {
         this.archetype = archetype;
         this.backstory = backstory;
         this.history = [];
+        this.isBusy = false;
         this.ai = new genai_1.GoogleGenAI({ apiKey });
         this.systemPrompt = this.buildSystemPrompt();
     }
@@ -58,24 +60,40 @@ Stay in character at all times. Respond as ${this.name} would — consistent wit
     getChatHistory() {
         return [...this.history];
     }
+    setMemoryContext(graph) {
+        const facts = graph.facts
+            .map(f => `- ${f.content}${f.secret ? " [you consider this sensitive]" : ""}`)
+            .join("\n") || "(no known facts)";
+        const rels = Object.entries(graph.relationships)
+            .map(([id, rel]) => `- ${types_1.NPC_NAMES[id] ?? id}: trust ${Math.round(rel.trust * 100)}%`)
+            .join("\n") || "(no established relationships)";
+        this.systemPrompt = this.buildSystemPrompt()
+            + `\n\nYour current knowledge:\n${facts}\n\nYour relationships:\n${rels}`;
+    }
     async chat(playerMessage) {
-        this.history.push({ role: "user", text: playerMessage });
-        const contents = this.history.map((m) => ({
-            role: m.role,
-            parts: [{ text: m.text }],
-        }));
-        console.log(`[NPC:${this.npcId}] >>> Gemini API request — model: gemini-2.0-flash, history turns: ${this.history.length}, message: "${playerMessage}"`);
-        const response = await this.ai.models.generateContent({
-            model: "gemini-2.0-flash",
-            config: {
-                systemInstruction: this.systemPrompt,
-            },
-            contents,
-        });
-        const replyText = response.text ?? "...";
-        console.log(`[NPC:${this.npcId}] <<< Gemini API response: "${replyText}"`);
-        this.history.push({ role: "model", text: replyText });
-        return replyText;
+        this.isBusy = true;
+        try {
+            this.history.push({ role: "user", text: playerMessage });
+            const contents = this.history.map((m) => ({
+                role: m.role,
+                parts: [{ text: m.text }],
+            }));
+            console.log(`[NPC:${this.npcId}] >>> Gemini API request — model: gemini-2.0-flash, history turns: ${this.history.length}, message: "${playerMessage}"`);
+            const response = await this.ai.models.generateContent({
+                model: "gemini-2.0-flash",
+                config: {
+                    systemInstruction: this.systemPrompt,
+                },
+                contents,
+            });
+            const replyText = response.text ?? "...";
+            console.log(`[NPC:${this.npcId}] <<< Gemini API response: "${replyText}"`);
+            this.history.push({ role: "model", text: replyText });
+            return replyText;
+        }
+        finally {
+            this.isBusy = false;
+        }
     }
     static fromAgentMd(npcId, name, apiKey) {
         const mdPath = path.join(AGENTS_DIR, `${npcId}.md`);
