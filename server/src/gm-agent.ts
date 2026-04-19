@@ -137,7 +137,7 @@ async function clearMemoryDir(): Promise<void> {
   for (const file of files) fs.unlinkSync(path.join(MEMORY_DIR, file));
 }
 
-function buildMemoryGraph(npcId: NpcId, config: AgentConfig, murderer: NpcId): MemoryGraph {
+export function buildMemoryGraph(npcId: NpcId, config: AgentConfig, murderer: NpcId): MemoryGraph {
   const facts: Fact[] = config.initial_facts.map(f => ({
     content: f.content,
     source: "self" as const,
