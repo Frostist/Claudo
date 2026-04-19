@@ -31,19 +31,15 @@ describe("parseGameSetupResponse", () => {
         npc_scarlett: {
           archetype: "The Liar",
           backstory: "A cunning socialite...",
-          relationships: { npc_mustard: "distrusts" },
-          notes: "She did it with the Knife in the Library."
+          relationships: { npc_mustard: { trust: 0.2, description: "distrusts" } },
+          initial_facts: [{ content: "I killed Lord Blackwood in the Library", secret: true }],
+          notes: "Committed the murder with the Knife in the Library."
         },
-        npc_mustard: {
-          archetype: "The Gossip",
-          backstory: "A retired colonel...",
-          relationships: { npc_scarlett: "admires" },
-          notes: ""
-        },
-        npc_white: { archetype: "The Recluse", backstory: "...", relationships: {}, notes: "" },
-        npc_green: { archetype: "The Witness", backstory: "...", relationships: {}, notes: "" },
-        npc_peacock: { archetype: "The Protector", backstory: "...", relationships: {}, notes: "" },
-        npc_plum: { archetype: "The Red Herring", backstory: "...", relationships: {}, notes: "" },
+        npc_mustard:  { archetype: "The Gossip",      backstory: "...", relationships: {}, initial_facts: [], notes: "" },
+        npc_white:    { archetype: "The Recluse",     backstory: "...", relationships: {}, initial_facts: [], notes: "" },
+        npc_green:    { archetype: "The Witness",     backstory: "...", relationships: {}, initial_facts: [], notes: "" },
+        npc_peacock:  { archetype: "The Protector",   backstory: "...", relationships: {}, initial_facts: [], notes: "" },
+        npc_plum:     { archetype: "The Red Herring", backstory: "...", relationships: {}, initial_facts: [], notes: "" },
       }
     });
 
@@ -61,12 +57,12 @@ describe("parseGameSetupResponse", () => {
       weapon: "Rope",
       room: "Kitchen",
       agents: {
-        npc_scarlett: { archetype: "The Liar", backstory: "", relationships: {}, notes: "" },
-        npc_mustard: { archetype: "The Gossip", backstory: "", relationships: {}, notes: "" },
-        npc_white: { archetype: "The Recluse", backstory: "", relationships: {}, notes: "" },
-        npc_green: { archetype: "The Witness", backstory: "", relationships: {}, notes: "" },
-        npc_peacock: { archetype: "The Protector", backstory: "", relationships: {}, notes: "" },
-        npc_plum: { archetype: "The Red Herring", backstory: "", relationships: {}, notes: "" },
+        npc_scarlett: { archetype: "The Liar",       backstory: "", relationships: {}, initial_facts: [], notes: "" },
+        npc_mustard:  { archetype: "The Gossip",     backstory: "", relationships: {}, initial_facts: [], notes: "" },
+        npc_white:    { archetype: "The Recluse",    backstory: "", relationships: {}, initial_facts: [], notes: "" },
+        npc_green:    { archetype: "The Witness",    backstory: "", relationships: {}, initial_facts: [], notes: "" },
+        npc_peacock:  { archetype: "The Protector",  backstory: "", relationships: {}, initial_facts: [], notes: "" },
+        npc_plum:     { archetype: "The Red Herring",backstory: "", relationships: {}, initial_facts: [], notes: "" },
       }
     });
     expect(() => parseGameSetupResponse(bad)).toThrow("murderer");
