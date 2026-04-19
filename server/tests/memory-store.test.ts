@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import * as fs from "fs";
 import { MemoryStore } from "../src/memory-store";
 import { MemoryGraph, Fact } from "../src/types";
 
@@ -79,5 +80,32 @@ describe("MemoryStore.getShareableFacts", () => {
   it("includes secret facts when trust >= 0.7", () => {
     const shareable = MemoryStore.getShareableFacts(baseGraph(), "npc_green");
     expect(shareable.some(f => f.secret)).toBe(true);
+  });
+});
+
+describe("MemoryStore.write", () => {
+  it("creates the memory dir when it does not exist, then writes the file", () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false);
+    MemoryStore.write(baseGraph());
+    expect(fs.mkdirSync).toHaveBeenCalledWith(
+      expect.stringContaining("data/memory"),
+      { recursive: true }
+    );
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      expect.stringContaining("npc_scarlett.json"),
+      expect.stringContaining('"npc_id"'),
+      "utf8"
+    );
+  });
+});
+
+describe("MemoryStore.read", () => {
+  it("returns a parsed MemoryGraph from disk", () => {
+    vi.mocked(fs.readFileSync).mockReturnValue(
+      JSON.stringify(baseGraph()) as unknown as Buffer
+    );
+    const result = MemoryStore.read("npc_scarlett");
+    expect(result.npc_id).toBe("npc_scarlett");
+    expect(result.facts).toHaveLength(2);
   });
 });
