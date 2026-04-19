@@ -33,4 +33,29 @@ describe("GameState", () => {
     expect(snap.active_npc_id).toBe("npc_white");
     expect(snap.npc_chat_histories["npc_white"]).toHaveLength(1);
   });
+
+  it("initialises NPC rooms from NPC_STARTING_ROOMS", () => {
+    expect(state.getNpcRoom("npc_scarlett")).toBe("Kitchen");
+    expect(state.getNpcRoom("npc_plum")).toBe("Library");
+  });
+
+  it("updates NPC room on setNpcRoom", () => {
+    state.setNpcRoom("npc_mustard", "Hall");
+    expect(state.getNpcRoom("npc_mustard")).toBe("Hall");
+  });
+
+  it("getNpcsInRoom returns only NPCs in that room", () => {
+    state.setNpcRoom("npc_scarlett", "Hall");
+    state.setNpcRoom("npc_mustard", "Hall");
+    const inHall = state.getNpcsInRoom("Hall");
+    expect(inHall).toContain("npc_scarlett");
+    expect(inHall).toContain("npc_mustard");
+    expect(inHall).not.toContain("npc_white");
+  });
+
+  it("records NPC↔NPC conversation transcript", () => {
+    state.recordNpcConversation("npc_scarlett", "npc_mustard", "Hall", "Scarlett: Hello.\nMustard: Indeed.");
+    expect(state.getNpcConversations()).toHaveLength(1);
+    expect(state.getNpcConversations()[0].transcript).toContain("Scarlett");
+  });
 });
