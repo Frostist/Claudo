@@ -29,5 +29,3 @@ The Games Master watches your progress in the background. If you're getting too 
 ## Running
 
 Open the project in Godot 4.6 and press **F5**.
-
-> The Node.js server is not yet implemented (Phase 1). NPC chat is coming soon.
