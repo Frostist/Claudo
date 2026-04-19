@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ARCHETYPES = exports.ROOMS = exports.WEAPONS = exports.NPC_NAMES = void 0;
+exports.NPC_STARTING_ROOMS = exports.ROOM_ADJACENCY = exports.ARCHETYPES = exports.ROOMS = exports.WEAPONS = exports.NPC_NAMES = void 0;
 exports.NPC_NAMES = {
     npc_scarlett: "Miss Scarlett",
     npc_mustard: "Col. Mustard",
@@ -36,4 +36,23 @@ exports.ARCHETYPES = [
     "The Protector",
     "The Red Herring",
 ];
+exports.ROOM_ADJACENCY = {
+    "Kitchen": ["Ballroom", "Billiard Room"],
+    "Ballroom": ["Kitchen", "Conservatory", "Hall"],
+    "Conservatory": ["Ballroom", "Library"],
+    "Billiard Room": ["Kitchen", "Hall", "Study"],
+    "Hall": ["Ballroom", "Billiard Room", "Library", "Lounge"],
+    "Library": ["Conservatory", "Hall", "Dining Room"],
+    "Study": ["Billiard Room", "Lounge"],
+    "Lounge": ["Hall", "Study", "Dining Room"],
+    "Dining Room": ["Library", "Lounge"],
+};
+exports.NPC_STARTING_ROOMS = {
+    npc_scarlett: "Kitchen",
+    npc_mustard: "Ballroom",
+    npc_white: "Conservatory",
+    npc_green: "Billiard Room",
+    npc_peacock: "Hall",
+    npc_plum: "Library",
+};
 //# sourceMappingURL=types.js.map
