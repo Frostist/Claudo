@@ -2,6 +2,7 @@ extends Node
 
 signal npc_reply(npc_id: String, text: String)
 signal game_ready()
+signal npc_moved(npc_id: String, room_name: String)
 
 const WS_URL := "ws://127.0.0.1:9876"
 const RECONNECT_INTERVAL := 3.0
@@ -76,6 +77,9 @@ func _handle_message(raw: String) -> void:
 			var text := data.get("text", "") as String
 			print("[ServerBridge] <<< NPC reply from ", npc_id, ": ", text)
 			npc_reply.emit(npc_id, text)
+		"npc_moved":
+			var d: Dictionary = msg.get("data", {})
+			npc_moved.emit(d.get("npc_id", ""), d.get("room_name", ""))
 		"state_snapshot":
 			pass  # Phase 2+ will handle restoring state
 		_:
