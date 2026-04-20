@@ -58,4 +58,35 @@ describe("GameState", () => {
     expect(state.getNpcConversations()).toHaveLength(1);
     expect(state.getNpcConversations()[0].transcript).toContain("Scarlett");
   });
+
+  it("starts with empty notebookText", () => {
+    expect(state.notebookText).toBe("");
+  });
+
+  it("updates notebookText", () => {
+    state.notebookText = "I suspect Mustard";
+    expect(state.notebookText).toBe("I suspect Mustard");
+  });
+
+  it("starts with zero eliminations and empty eliminated set", () => {
+    expect(state.eliminationCount).toBe(0);
+    expect(state.isEliminated("npc_scarlett")).toBe(false);
+  });
+
+  it("records an elimination", () => {
+    state.recordElimination("npc_scarlett");
+    expect(state.isEliminated("npc_scarlett")).toBe(true);
+    expect(state.eliminationCount).toBe(1);
+  });
+
+  it("spy queue starts empty", () => {
+    expect(state.spyQueue).toBeNull();
+  });
+
+  it("sets and clears spy queue", () => {
+    state.spyQueue = "npc_mustard";
+    expect(state.spyQueue).toBe("npc_mustard");
+    state.spyQueue = null;
+    expect(state.spyQueue).toBeNull();
+  });
 });

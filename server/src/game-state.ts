@@ -29,6 +29,11 @@ export class GameState {
   activeNpcId: NpcId | null = null;
   playerRoom: string | null = null;
 
+  notebookText: string = "";
+  eliminationCount: number = 0;
+  spyQueue: NpcId | null = null;
+  private eliminatedNpcs: Set<NpcId> = new Set();
+
   getChatHistory(npcId: NpcId): ChatMessage[] {
     return this.histories.get(npcId) ?? [];
   }
@@ -58,6 +63,19 @@ export class GameState {
 
   getNpcConversations() {
     return [...this.npcConversations];
+  }
+
+  isEliminated(npcId: NpcId): boolean {
+    return this.eliminatedNpcs.has(npcId);
+  }
+
+  recordElimination(npcId: NpcId): void {
+    this.eliminatedNpcs.add(npcId);
+    this.eliminationCount++;
+  }
+
+  getEliminatedNpcs(): NpcId[] {
+    return Array.from(this.eliminatedNpcs);
   }
 
   toSnapshot(): StateSnapshot {
