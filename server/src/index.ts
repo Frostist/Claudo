@@ -18,7 +18,6 @@ import { GmLoop } from "./gm-loop";
 
 function checkEnv(): void {
   const missing: string[] = [];
-  if (!process.env.ANTHROPIC_API_KEY) missing.push("ANTHROPIC_API_KEY");
   if (!process.env.GOOGLE_API_KEY) missing.push("GOOGLE_API_KEY");
   if (missing.length > 0) {
     console.error(`[ERROR] Missing environment variables: ${missing.join(", ")}`);

@@ -50,8 +50,6 @@ const spy_system_1 = require("./spy-system");
 const gm_loop_1 = require("./gm-loop");
 function checkEnv() {
     const missing = [];
-    if (!process.env.ANTHROPIC_API_KEY)
-        missing.push("ANTHROPIC_API_KEY");
     if (!process.env.GOOGLE_API_KEY)
         missing.push("GOOGLE_API_KEY");
     if (missing.length > 0) {

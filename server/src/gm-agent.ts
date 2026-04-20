@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
 import * as fs from "fs";
 import * as path from "path";
 import { NpcId, NPC_NAMES, WEAPONS, ROOMS, ARCHETYPES, TruthFile, MemoryGraph, Fact, NpcRelationship } from "./types";
@@ -18,6 +17,93 @@ export interface AgentConfig {
 interface GameSetupResult {
   truth: TruthFile;
   agents: Record<NpcId, AgentConfig>;
+}
+
+function buildFallbackGameSetup(): GameSetupResult {
+  const murderer: NpcId = "npc_scarlett";
+  const truth: TruthFile = {
+    murderer,
+    weapon: "Knife",
+    room: "Library",
+  };
+
+  const archetypesByNpc: Record<NpcId, string> = {
+    npc_scarlett: "The Liar",
+    npc_mustard: "The Gossip",
+    npc_white: "The Recluse",
+    npc_green: "The Witness",
+    npc_peacock: "The Protector",
+    npc_plum: "The Red Herring",
+  };
+
+  const relationshipHintByNpc: Record<NpcId, string> = {
+    npc_scarlett: "keeps them at arm's length",
+    npc_mustard: "likes trading rumors with them",
+    npc_white: "prefers to avoid them",
+    npc_green: "watches them carefully",
+    npc_peacock: "tries to keep peace with them",
+    npc_plum: "finds them suspiciously interesting",
+  };
+
+  const trustByNpc: Record<NpcId, number> = {
+    npc_scarlett: 0.35,
+    npc_mustard: 0.6,
+    npc_white: 0.4,
+    npc_green: 0.55,
+    npc_peacock: 0.7,
+    npc_plum: 0.5,
+  };
+
+  const backstoryByNpc: Record<NpcId, string> = {
+    npc_scarlett: "A polished socialite who manages every room through charm, timing, and carefully planted half-truths.",
+    npc_mustard: "A boastful former officer who knows everybody's business and cannot resist sharing what he hears.",
+    npc_white: "A withdrawn housekeeper with sharp eyes and a habit of listening from hallways no one notices.",
+    npc_green: "A measured cleric who observes quietly and remembers details others dismiss.",
+    npc_peacock: "A well-connected host determined to keep the manor's reputation intact at any cost.",
+    npc_plum: "An absent-minded professor whose odd timing and strange experiments make him look guilty even when he is not.",
+  };
+
+  const agents = {} as Record<NpcId, AgentConfig>;
+  const npcIds = Object.keys(NPC_NAMES) as NpcId[];
+
+  for (const npcId of npcIds) {
+    const relationships: Record<string, { trust: number; description: string }> = {};
+    for (const otherId of npcIds) {
+      if (otherId === npcId) continue;
+      relationships[otherId] = {
+        trust: trustByNpc[npcId],
+        description: relationshipHintByNpc[npcId],
+      };
+    }
+
+    const initialFacts: Array<{ content: string; secret: boolean }> = [
+      { content: `${NPC_NAMES[npcId]} was near the ${truth.room} shortly before the alarm.`, secret: false },
+      { content: `${NPC_NAMES[npcId]} believes one guest is hiding evidence.`, secret: false },
+    ];
+
+    if (npcId === murderer) {
+      initialFacts.push({
+        content: `I used the ${truth.weapon} in the ${truth.room}, and I must keep that hidden.`,
+        secret: true,
+      });
+    }
+
+    if (npcId === "npc_green") {
+      initialFacts.push({ content: `I saw someone leave the ${truth.room} in a hurry.`, secret: false });
+    }
+
+    agents[npcId] = {
+      archetype: archetypesByNpc[npcId],
+      backstory: backstoryByNpc[npcId],
+      relationships,
+      initial_facts: initialFacts,
+      notes: npcId === murderer
+        ? `Committed the murder with the ${truth.weapon} in the ${truth.room}.`
+        : "",
+    };
+  }
+
+  return { truth, agents };
 }
 
 export function buildGameSetupPrompt(): string {
@@ -159,27 +245,9 @@ export function buildMemoryGraph(npcId: NpcId, config: AgentConfig, murderer: Np
 }
 
 export async function runGameSetup(): Promise<void> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
-
-  const client = new Anthropic({ apiKey });
-
   console.log("[GM] Running GameSetup…");
-
-  const prompt = buildGameSetupPrompt();
-  console.log(`[GM] >>> Claude API request — model: claude-opus-4-7, max_tokens: 4096, prompt length: ${prompt.length} chars`);
-
-  const message = await client.messages.create({
-    model: "claude-opus-4-7",
-    max_tokens: 4096,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const rawText = message.content.find((c) => c.type === "text")?.text ?? "";
-  console.log(`[GM] <<< Claude API response — stop_reason: ${message.stop_reason}, usage: ${JSON.stringify(message.usage)}, response length: ${rawText.length} chars`);
-  console.log(`[GM] <<< Raw response (first 500 chars): ${rawText.slice(0, 500)}`);
-
-  const result = parseGameSetupResponse(rawText);
+  const result = buildFallbackGameSetup();
+  console.log("[GM] Using deterministic local setup (Anthropic removed).");
 
   await clearAgentsDir();
   await clearMemoryDir();
