@@ -57,7 +57,7 @@ server/src/
 
 **@google/genai API:** `systemInstruction` must be inside the `config` object, not top-level:
 ```typescript
-await ai.models.generateContent({ model: "gemini-2.0-flash", config: { systemInstruction: ... }, contents })
+await ai.models.generateContent({ model: "gemini-2.5-flash", config: { systemInstruction: ... }, contents })
 ```
 
 ## Godot architecture

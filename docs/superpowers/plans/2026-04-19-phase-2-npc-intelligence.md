@@ -1017,7 +1017,7 @@ export async function runNpcConversation(
 
   // Step 1: Generate dialogue
   const dialogueResp = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     contents: [{ role: "user", parts: [{ text: buildDialoguePrompt(npcAId, graphA, npcBId, graphB) }] }],
   });
   const rawDialogue = (dialogueResp as { text: string }).text ?? "[]";
@@ -1039,11 +1039,11 @@ export async function runNpcConversation(
   // Step 2: Asymmetric fact extraction — two parallel Gemini calls, passing existing facts for contradiction detection
   const [respA, respB] = await Promise.all([
     ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: buildExtractionPrompt(NPC_NAMES[npcAId], NPC_NAMES[npcBId], graphA.facts, transcript) }] }],
     }),
     ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: buildExtractionPrompt(NPC_NAMES[npcBId], NPC_NAMES[npcAId], graphB.facts, transcript) }] }],
     }),
   ]);

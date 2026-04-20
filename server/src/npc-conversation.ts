@@ -13,7 +13,7 @@ export interface ConversationResult {
   learnedB: Fact[];
 }
 
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-2.5-flash";
 const MAX_RETRIES = 3;
 const BASE_BACKOFF_MS = 500;
 

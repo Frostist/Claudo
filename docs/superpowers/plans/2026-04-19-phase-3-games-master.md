@@ -548,7 +548,7 @@ export class SpySystem {
     try {
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
       return (response as { text: string }).text?.trim() ?? nonSecretFacts[0].content;

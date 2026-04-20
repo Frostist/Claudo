@@ -863,7 +863,7 @@ Stay in character at all times. Respond as ${this.name} would — consistent wit
     }));
 
     const response = await this.ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       config: {
         systemInstruction: this.systemPrompt,
       },

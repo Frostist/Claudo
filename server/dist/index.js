@@ -48,6 +48,11 @@ const memory_store_1 = require("./memory-store");
 const npc_conversation_1 = require("./npc-conversation");
 const spy_system_1 = require("./spy-system");
 const gm_loop_1 = require("./gm-loop");
+const NPC_CONVERSATION_QUIET_PERIOD_MS = 60000;
+const NPC_CONVERSATION_TURN_PAUSE_MS = 10000;
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 function checkEnv() {
     const missing = [];
     if (!process.env.GOOGLE_API_KEY)
@@ -158,11 +163,14 @@ async function main() {
     gmLoop.start();
     // Track in-progress NPC↔NPC conversations to prevent double-triggering
     const conversationsInProgress = new Set();
+    const conversationsUnlockedAt = Date.now() + NPC_CONVERSATION_QUIET_PERIOD_MS;
     function conversationKey(a, b) {
         return [a, b].sort().join("+");
     }
     async function maybeStartConversation(arrivedNpc, room) {
         if (!state.playerRoom)
+            return;
+        if (Date.now() < conversationsUnlockedAt)
             return;
         const others = state.getNpcsInRoom(room).filter(id => id !== arrivedNpc);
         if (others.length === 0)
@@ -191,9 +199,18 @@ async function main() {
             const graphA = memory_store_1.MemoryStore.read(arrivedNpc);
             const graphB = memory_store_1.MemoryStore.read(partner);
             const result = await (0, npc_conversation_1.runNpcConversation)(arrivedNpc, partner, graphA, graphB, process.env.GOOGLE_API_KEY);
+            for (let i = 0; i < result.transcript.length; i++) {
+                if (i > 0) {
+                    await sleep(NPC_CONVERSATION_TURN_PAUSE_MS);
+                }
+                const partialLines = result.transcript
+                    .slice(0, i + 1)
+                    .map(t => `${types_1.NPC_NAMES[t.speaker]}: ${t.text}`)
+                    .join("\n");
+                ws.send("npc_chat_npc", { npc_a: arrivedNpc, npc_b: partner, room, transcript: partialLines });
+            }
             const lines = result.transcript.map(t => `${types_1.NPC_NAMES[t.speaker]}: ${t.text}`).join("\n");
             state.recordNpcConversation(arrivedNpc, partner, room, lines); // in-memory log; Phase 3 GM reads via state
-            ws.send("npc_chat_npc", { npc_a: arrivedNpc, npc_b: partner, room, transcript: lines });
         }
         catch (err) {
             console.error("[Conversation] Error:", err);

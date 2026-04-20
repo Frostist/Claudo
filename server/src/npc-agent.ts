@@ -57,10 +57,10 @@ Stay in character at all times. Respond as ${this.name} would — consistent wit
         parts: [{ text: m.text }],
       }));
 
-      console.log(`[NPC:${this.npcId}] >>> Gemini API request — model: gemini-2.0-flash, history turns: ${this.history.length}, message: "${playerMessage}"`);
+      console.log(`[NPC:${this.npcId}] >>> Gemini API request — model: gemini-2.5-flash, history turns: ${this.history.length}, message: "${playerMessage}"`);
 
       const response = await this.ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         config: {
           systemInstruction: this.systemPrompt,
         },
