@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_4.png" id="10_npc4"]
 [ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_5.png" id="11_npc5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/npcs/npc_6.png" id="12_npc6"]
-[ext_resource type="PackedScene" path="res://scenes/ui/loading/loading_screen.tscn" id="13_loading"]
+[ext_resource type="PackedScene" path="res://scenes/ui/start/start_screen.tscn" id="13_start"]
 [ext_resource type="PackedScene" path="res://scenes/ui/chat/chat_window.tscn" id="14_chat"]
 
 [node name="Main" type="Node2D"]
@@ -72,7 +72,7 @@ limit_bottom = 912
 
 [node name="Notebook" parent="." instance=ExtResource("5_notebook")]
 
-[node name="LoadingScreen" parent="." instance=ExtResource("13_loading")]
+[node name="StartScreen" parent="." instance=ExtResource("13_start")]
 
 [node name="ChatWindow" parent="." instance=ExtResource("14_chat")]
 groups = ["chat_window"]
