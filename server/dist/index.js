@@ -67,6 +67,11 @@ async function main() {
     // Start WS server FIRST so port 9876 is open before Godot's 1.5s wait expires.
     // GameSetup takes 5–15 seconds; Godot connects while it runs, then waits for game_ready.
     let ws;
+    let setupComplete = false;
+    const sendGameReady = () => {
+        ws.send("game_ready", { npc_names: Object.values(types_1.NPC_NAMES) });
+        console.log("[Server] game_ready sent");
+    };
     ws = new ws_server_1.WsServer(9876, async (event, data, _socket) => {
         switch (event) {
             case "player_chat": {
@@ -117,6 +122,11 @@ async function main() {
                 break;
             }
         }
+    });
+    ws.onClientConnected(() => {
+        if (!setupComplete)
+            return;
+        sendGameReady();
     });
     // Run GM GameSetup (writes agent.md files, truth.json) — Godot is already connected and waiting
     await (0, gm_agent_1.runGameSetup)();
@@ -188,9 +198,8 @@ async function main() {
     }, (npcId) => agents.get(npcId)?.isBusy ?? false);
     loop.start(Object.keys(types_1.NPC_NAMES));
     console.log("[Server] Autonomy loop started");
-    // Godot client is connected — send game_ready immediately
-    ws.send("game_ready", { npc_names: Object.values(types_1.NPC_NAMES) });
-    console.log("[Server] game_ready sent");
+    setupComplete = true;
+    sendGameReady();
 }
 main().catch((err) => {
     console.error("[Server] Fatal error:", err);
