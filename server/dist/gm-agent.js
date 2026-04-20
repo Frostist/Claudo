@@ -249,7 +249,7 @@ function buildMemoryGraph(npcId, config, murderer) {
 async function runGameSetup() {
     console.log("[GM] Running GameSetup…");
     const result = buildFallbackGameSetup();
-    console.log("[GM] Using deterministic local setup (Anthropic removed).");
+    console.log("[GM] Using deterministic local setup.");
     await clearAgentsDir();
     await clearMemoryDir();
     // Write agent.md files
