@@ -34,6 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = __importStar(require("dotenv"));
+const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 // Load .env if present (development convenience — production uses env vars)
 dotenv.config({ path: path.join(__dirname, "../.env") });
@@ -45,6 +46,8 @@ const types_1 = require("./types");
 const autonomy_loop_1 = require("./autonomy-loop");
 const memory_store_1 = require("./memory-store");
 const npc_conversation_1 = require("./npc-conversation");
+const spy_system_1 = require("./spy-system");
+const gm_loop_1 = require("./gm-loop");
 function checkEnv() {
     const missing = [];
     if (!process.env.ANTHROPIC_API_KEY)
@@ -61,6 +64,8 @@ async function main() {
     checkEnv();
     const state = new game_state_1.GameState();
     const agents = new Map();
+    let spySystem;
+    let gmLoop;
     // Start WS server FIRST so port 9876 is open before Godot's 1.5s wait expires.
     // GameSetup takes 5–15 seconds; Godot connects while it runs, then waits for game_ready.
     let ws;
@@ -90,11 +95,23 @@ async function main() {
                 break;
             }
             case "player_moved": {
+                const previousRoom = state.playerRoom;
                 state.playerRoom = data.room_name;
+                if (previousRoom) {
+                    spySystem.checkPlayerMoved(previousRoom);
+                }
                 break;
             }
             case "notebook_updated": {
-                // Accepted and ignored in Phase 1 — GM evaluation loop is Phase 3
+                state.notebookText = data.text;
+                break;
+            }
+            case "body_interacted": {
+                const npcId = data.npc_id;
+                if (!state.isEliminated(npcId))
+                    break;
+                const clue = await spySystem.getBodyClue(npcId, process.env.GOOGLE_API_KEY);
+                ws.send("npc_clue", { npc_id: npcId, clue_text: clue });
                 break;
             }
             case "reconnect": {
@@ -105,10 +122,20 @@ async function main() {
     });
     // Run GM GameSetup (writes agent.md files, truth.json) — Godot is already connected and waiting
     await (0, gm_agent_1.runGameSetup)();
+    // Read truth.json written by GameSetup
+    const truth = JSON.parse(fs.readFileSync(path.join(__dirname, "../data/truth.json"), "utf8"));
     // Load NPC agents from freshly written agent.md files
     for (const [npcId, name] of Object.entries(types_1.NPC_NAMES)) {
         agents.set(npcId, npc_agent_1.NpcAgent.fromAgentMd(npcId, name, process.env.GOOGLE_API_KEY));
     }
+    // Instantiate SpySystem with callbacks into state
+    spySystem = new spy_system_1.SpySystem(() => truth.murderer, () => state.eliminationCount, () => state.spyQueue, (id) => { state.spyQueue = id; }, (npcId) => state.getNpcRoom(npcId), () => state.playerRoom, (npcId) => state.isEliminated(npcId), (npcId) => state.recordElimination(npcId), (npcId) => {
+        console.log(`[Spy] Eliminating ${npcId}`);
+        ws.send("npc_eliminated", { npc_id: npcId });
+    });
+    // Instantiate and start GmLoop
+    gmLoop = new gm_loop_1.GmLoop(process.env.ANTHROPIC_API_KEY, truth, spySystem, () => state.notebookText, () => state.playerRoom, (npcId) => state.getChatHistory(npcId), () => state.getNpcConversations());
+    gmLoop.start();
     // Track in-progress NPC↔NPC conversations to prevent double-triggering
     const conversationsInProgress = new Set();
     function conversationKey(a, b) {

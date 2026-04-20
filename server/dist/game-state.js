@@ -17,6 +17,10 @@ class GameState {
         this.npcConversations = [];
         this.activeNpcId = null;
         this.playerRoom = null;
+        this.notebookText = "";
+        this.eliminationCount = 0;
+        this.spyQueue = null;
+        this.eliminatedNpcs = new Set();
     }
     getChatHistory(npcId) {
         return this.histories.get(npcId) ?? [];
@@ -42,6 +46,16 @@ class GameState {
     }
     getNpcConversations() {
         return [...this.npcConversations];
+    }
+    isEliminated(npcId) {
+        return this.eliminatedNpcs.has(npcId);
+    }
+    recordElimination(npcId) {
+        this.eliminatedNpcs.add(npcId);
+        this.eliminationCount++;
+    }
+    getEliminatedNpcs() {
+        return Array.from(this.eliminatedNpcs);
     }
     toSnapshot() {
         const npc_chat_histories = {};
