@@ -19,19 +19,29 @@ func _build_ui() -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.add_child(center)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	center.add_child(margin)
+
 	var layout := VBoxContainer.new()
-	layout.set_anchors_preset(Control.PRESET_CENTER)
 	layout.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	layout.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	layout.custom_minimum_size = Vector2(860, 460)
 	layout.alignment = BoxContainer.ALIGNMENT_CENTER
 	layout.add_theme_constant_override("separation", 16)
-	panel.add_child(layout)
+	margin.add_child(layout)
 
 	var title := Label.new()
 	title.text = TITLE_ART
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.clip_text = false
+	title.add_theme_font_size_override("font_size", 13)
 	layout.add_child(title)
 
 	var subtitle := Label.new()
