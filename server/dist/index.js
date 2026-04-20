@@ -91,10 +91,22 @@ async function main() {
                     agent.setMemoryContext(graph);
                 }
                 catch { /* memory not yet written — shouldn't happen post-setup */ }
-                const reply = await agent.chat(message);
-                state.appendMessage(npcId, { role: "model", text: reply });
-                state.activeNpcId = null;
-                ws.send("npc_reply", { npc_id: npcId, text: reply });
+                try {
+                    const reply = await agent.chat(message);
+                    state.appendMessage(npcId, { role: "model", text: reply });
+                    ws.send("npc_reply", { npc_id: npcId, text: reply });
+                }
+                catch (err) {
+                    const detail = err instanceof Error ? err.message : String(err);
+                    console.error(`[Server] player_chat failed for ${npcId}:`, detail);
+                    const fallback = /429|RESOURCE_EXHAUSTED/i.test(detail)
+                        ? "[I'm momentarily overwhelmed — please try again in a few moments.]"
+                        : "[I can't respond right now. Please try again in a moment.]";
+                    ws.send("npc_reply", { npc_id: npcId, text: fallback });
+                }
+                finally {
+                    state.activeNpcId = null;
+                }
                 break;
             }
             case "player_moved": {
