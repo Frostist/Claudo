@@ -134,7 +134,7 @@ async function main() {
         ws.send("npc_eliminated", { npc_id: npcId });
     });
     // Instantiate and start GmLoop
-    gmLoop = new gm_loop_1.GmLoop(process.env.ANTHROPIC_API_KEY, truth, spySystem, () => state.notebookText, () => state.playerRoom, (npcId) => state.getChatHistory(npcId), () => state.getNpcConversations());
+    gmLoop = new gm_loop_1.GmLoop(process.env.GOOGLE_API_KEY, truth, spySystem, () => state.notebookText, () => state.playerRoom, (npcId) => state.getChatHistory(npcId), () => state.getNpcConversations());
     gmLoop.start();
     // Track in-progress NPC↔NPC conversations to prevent double-triggering
     const conversationsInProgress = new Set();

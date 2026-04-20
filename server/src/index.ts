@@ -126,7 +126,7 @@ async function main(): Promise<void> {
 
   // Instantiate and start GmLoop
   gmLoop = new GmLoop(
-    process.env.ANTHROPIC_API_KEY!,
+    process.env.GOOGLE_API_KEY!,
     truth,
     spySystem,
     () => state.notebookText,

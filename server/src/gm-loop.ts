@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import type { Tool, MessageParam } from "@anthropic-ai/sdk/resources/messages";
+import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
 import { NpcId, NPC_NAMES, TruthFile } from "./types";
 import { MemoryStore } from "./memory-store";
 import { calculateHeatScore } from "./heat-score";
@@ -52,36 +51,36 @@ ${activity}
 Evaluate the situation and decide whether to dispatch the spy.`;
 }
 
-const GM_TOOLS: Tool[] = [
+const GM_FUNCTION_DECLARATIONS: FunctionDeclaration[] = [
   {
     name: "read_chat_logs",
     description: "Read player↔NPC and NPC↔NPC conversation transcripts. Pass npc_id to filter to one NPC, or omit for all.",
-    input_schema: { type: "object" as const, properties: { npc_id: { type: "string", description: "Optional NPC ID to filter" } } },
+    parameters: { type: Type.OBJECT, properties: { npc_id: { type: Type.STRING, description: "Optional NPC ID to filter" } } },
   },
   {
     name: "read_memory_graph",
     description: "Read an NPC's full memory graph.",
-    input_schema: { type: "object" as const, properties: { npc_id: { type: "string" } }, required: ["npc_id"] },
+    parameters: { type: Type.OBJECT, properties: { npc_id: { type: Type.STRING } }, required: ["npc_id"] },
   },
   {
     name: "read_notebook",
     description: "Read the player's current detective notebook text.",
-    input_schema: { type: "object" as const, properties: {} },
+    parameters: { type: Type.OBJECT, properties: {} },
   },
   {
     name: "get_heat_score",
     description: "Get the current heat score (0–99) based on the player's notebook.",
-    input_schema: { type: "object" as const, properties: {} },
+    parameters: { type: Type.OBJECT, properties: {} },
   },
   {
     name: "get_player_location",
     description: "Get the room the player is currently in.",
-    input_schema: { type: "object" as const, properties: {} },
+    parameters: { type: Type.OBJECT, properties: {} },
   },
   {
     name: "dispatch_spy",
     description: "Eliminate a target NPC. Returns eliminated, queued, or an error.",
-    input_schema: { type: "object" as const, properties: { npc_id: { type: "string" } }, required: ["npc_id"] },
+    parameters: { type: Type.OBJECT, properties: { npc_id: { type: Type.STRING } }, required: ["npc_id"] },
   },
 ];
 
@@ -144,30 +143,40 @@ export class GmLoop {
   }
 
   private async runToolLoop(snap: GmEvalSnapshot): Promise<void> {
-    const client = new Anthropic({ apiKey: this.apiKey });
-    const messages: MessageParam[] = [{ role: "user", content: buildEvalSnapshot(snap) }];
+    const ai = new GoogleGenAI({ apiKey: this.apiKey });
+
+    type Content = { role: string; parts: Record<string, unknown>[] };
+    const contents: Content[] = [
+      { role: "user", parts: [{ text: buildEvalSnapshot(snap) }] }
+    ];
 
     for (let turn = 0; turn < 10; turn++) {
-      const response = await client.messages.create({
-        model: "claude-opus-4-7",
-        max_tokens: 1024,
-        system: buildGmSystemPrompt(),
-        tools: GM_TOOLS,
-        messages,
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          systemInstruction: buildGmSystemPrompt(),
+          tools: [{ functionDeclarations: GM_FUNCTION_DECLARATIONS }],
+        },
+        contents,
       });
 
-      console.log(`[GmLoop] Turn ${turn + 1} — stop_reason: ${response.stop_reason}`);
-      messages.push({ role: "assistant", content: response.content });
-      if (response.stop_reason !== "tool_use") break;
+      console.log(`[GmLoop] Turn ${turn + 1}`);
 
-      const toolResults: Anthropic.ToolResultBlockParam[] = [];
-      for (const block of response.content) {
-        if (block.type !== "tool_use") continue;
-        const result = this.executeTool(block.name, block.input as Record<string, string>);
-        console.log(`[GmLoop] Tool: ${block.name}(${JSON.stringify(block.input)}) → ${JSON.stringify(result)}`);
-        toolResults.push({ type: "tool_result", tool_use_id: block.id, content: JSON.stringify(result) });
-      }
-      messages.push({ role: "user", content: toolResults });
+      // Add model response to conversation history
+      const modelContent = response.candidates?.[0]?.content;
+      if (modelContent) contents.push(modelContent as unknown as Content);
+
+      const functionCalls = response.functionCalls;
+      if (!functionCalls || functionCalls.length === 0) break;
+
+      // Execute tools and send results back
+      const funcResultParts = functionCalls.map(fc => {
+        const name = fc.name ?? "unknown";
+        const result = this.executeTool(name, fc.args as Record<string, string>);
+        console.log(`[GmLoop] Tool: ${name}(${JSON.stringify(fc.args)}) → ${JSON.stringify(result)}`);
+        return { functionResponse: { name, response: result } };
+      });
+      contents.push({ role: "user", parts: funcResultParts });
     }
   }
 
