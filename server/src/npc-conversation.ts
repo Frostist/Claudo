@@ -13,6 +13,45 @@ export interface ConversationResult {
   learnedB: Fact[];
 }
 
+const MODEL_NAME = "gemini-2.0-flash";
+const MAX_RETRIES = 3;
+const BASE_BACKOFF_MS = 500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRateLimitError(err: unknown): boolean {
+  if (typeof err !== "object" || err === null) return false;
+  const maybeErr = err as { status?: number; message?: string };
+  const message = String(maybeErr.message ?? "");
+  return maybeErr.status === 429 || /429|RESOURCE_EXHAUSTED|Too Many Requests/i.test(message);
+}
+
+async function generateTextWithRetry(
+  ai: GoogleGenAI,
+  prompt: string,
+  label: string
+): Promise<string> {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      });
+      return (response as { text: string }).text ?? "";
+    } catch (err) {
+      if (!isRateLimitError(err) || attempt === MAX_RETRIES) {
+        throw err;
+      }
+      const delayMs = BASE_BACKOFF_MS * (2 ** attempt) + Math.floor(Math.random() * 200);
+      console.warn(`[NpcConversation] ${label} rate-limited; retrying in ${delayMs}ms (${attempt + 1}/${MAX_RETRIES + 1})`);
+      await sleep(delayMs);
+    }
+  }
+  return "";
+}
+
 export function parseLearned(raw: string): Fact[] {
   try {
     const cleaned = raw.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
@@ -95,54 +134,56 @@ export async function runNpcConversation(
 ): Promise<ConversationResult> {
   const ai = new GoogleGenAI({ apiKey });
 
-  // Step 1: Generate dialogue
-  const dialogueResp = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
-    contents: [{ role: "user", parts: [{ text: buildDialoguePrompt(npcAId, graphA, npcBId, graphB) }] }],
-  });
-  const rawDialogue = (dialogueResp as { text: string }).text ?? "[]";
-
-  let transcript: ConversationTurn[] = [];
   try {
-    const cleaned = rawDialogue.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
-    const parsed = JSON.parse(cleaned);
-    if (!Array.isArray(parsed)) {
-      console.warn("[NpcConversation] Dialogue response was not an array — skipping");
+    const rawDialogue = await generateTextWithRetry(
+      ai,
+      buildDialoguePrompt(npcAId, graphA, npcBId, graphB),
+      "dialogue"
+    );
+
+    let transcript: ConversationTurn[] = [];
+    try {
+      const cleaned = rawDialogue.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed)) {
+        console.warn("[NpcConversation] Dialogue response was not an array — skipping");
+        return { transcript: [], learnedA: [], learnedB: [] };
+      }
+      transcript = parsed;
+    } catch {
+      console.warn("[NpcConversation] Failed to parse dialogue JSON — skipping fact extraction");
       return { transcript: [], learnedA: [], learnedB: [] };
     }
-    transcript = parsed;
-  } catch {
-    console.warn("[NpcConversation] Failed to parse dialogue JSON — skipping fact extraction");
+
+    const rawLearnedA = await generateTextWithRetry(
+      ai,
+      buildExtractionPrompt(NPC_NAMES[npcAId], NPC_NAMES[npcBId], graphA.facts, transcript),
+      "extract-A"
+    );
+    const rawLearnedB = await generateTextWithRetry(
+      ai,
+      buildExtractionPrompt(NPC_NAMES[npcBId], NPC_NAMES[npcAId], graphB.facts, transcript),
+      "extract-B"
+    );
+
+    const learnedA = resolveContradictions(
+      parseLearned(rawLearnedA || "[]") as Array<Fact & { contradicts_existing?: string }>,
+      graphA.facts, npcBId
+    );
+    const learnedB = resolveContradictions(
+      parseLearned(rawLearnedB || "[]") as Array<Fact & { contradicts_existing?: string }>,
+      graphB.facts, npcAId
+    );
+
+    for (const fact of learnedA) MemoryStore.appendFact(graphA, fact);
+    for (const fact of learnedB) MemoryStore.appendFact(graphB, fact);
+    MemoryStore.write(graphA);
+    MemoryStore.write(graphB);
+
+    console.log(`[NpcConversation] ${npcAId} learned ${learnedA.length} facts, ${npcBId} learned ${learnedB.length} facts`);
+    return { transcript, learnedA, learnedB };
+  } catch (err) {
+    console.warn(`[NpcConversation] Skipping conversation ${npcAId}↔${npcBId} after AI failure.`, err);
     return { transcript: [], learnedA: [], learnedB: [] };
   }
-
-  // Step 2: Asymmetric fact extraction — two parallel Gemini calls
-  const [respA, respB] = await Promise.all([
-    ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [{ role: "user", parts: [{ text: buildExtractionPrompt(NPC_NAMES[npcAId], NPC_NAMES[npcBId], graphA.facts, transcript) }] }],
-    }),
-    ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [{ role: "user", parts: [{ text: buildExtractionPrompt(NPC_NAMES[npcBId], NPC_NAMES[npcAId], graphB.facts, transcript) }] }],
-    }),
-  ]);
-
-  const learnedA = resolveContradictions(
-    parseLearned((respA as { text: string }).text ?? "[]") as Array<Fact & { contradicts_existing?: string }>,
-    graphA.facts, npcBId
-  );
-  const learnedB = resolveContradictions(
-    parseLearned((respB as { text: string }).text ?? "[]") as Array<Fact & { contradicts_existing?: string }>,
-    graphB.facts, npcAId
-  );
-
-  // Step 3: Update memory graphs
-  for (const fact of learnedA) MemoryStore.appendFact(graphA, fact);
-  for (const fact of learnedB) MemoryStore.appendFact(graphB, fact);
-  MemoryStore.write(graphA);
-  MemoryStore.write(graphB);
-
-  console.log(`[NpcConversation] ${npcAId} learned ${learnedA.length} facts, ${npcBId} learned ${learnedB.length} facts`);
-  return { transcript, learnedA, learnedB };
 }

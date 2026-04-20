@@ -140,6 +140,8 @@ async function main() {
         return [a, b].sort().join("+");
     }
     async function maybeStartConversation(arrivedNpc, room) {
+        if (!state.playerRoom)
+            return;
         const others = state.getNpcsInRoom(room).filter(id => id !== arrivedNpc);
         if (others.length === 0)
             return;

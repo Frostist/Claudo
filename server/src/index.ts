@@ -143,6 +143,8 @@ async function main(): Promise<void> {
   }
 
   async function maybeStartConversation(arrivedNpc: NpcId, room: string): Promise<void> {
+    if (!state.playerRoom) return;
+
     const others = state.getNpcsInRoom(room).filter(id => id !== arrivedNpc);
     if (others.length === 0) return;
 
