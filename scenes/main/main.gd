@@ -2,6 +2,9 @@ extends Node2D
 
 @onready var mansion: Node2D = $Mansion
 @onready var hud = $HUD
+@onready var player: CharacterBody2D = $Player
+@onready var notebook: CanvasLayer = $Notebook
+@onready var chat_window: CanvasLayer = $ChatWindow
 @onready var start_screen = $StartScreen
 
 const LOADING_SCREEN_SCENE := preload("res://scenes/ui/loading/loading_screen.tscn")
@@ -13,11 +16,22 @@ func _ready() -> void:
 	mansion.room_changed.connect(hud.update_room)
 	mansion.room_changed.connect(ServerBridge.send_player_moved)
 	start_screen.start_requested.connect(_on_start_requested)
+	_set_gameplay_enabled(false)
 
 func _on_start_requested(api_key: String) -> void:
+	_set_gameplay_enabled(true)
 	var loading_screen := LOADING_SCREEN_SCENE.instantiate()
 	add_child(loading_screen)
 	_spawn_server(api_key)
+
+func _set_gameplay_enabled(enabled: bool) -> void:
+	player.set_physics_process(enabled)
+	player.set_process_input(enabled)
+	player.set_process_unhandled_input(enabled)
+	notebook.set_process_input(enabled)
+	notebook.set_process_unhandled_input(enabled)
+	chat_window.set_process_input(enabled)
+	chat_window.set_process_unhandled_input(enabled)
 
 func _spawn_server(api_key: String) -> void:
 	var script_path := ProjectSettings.globalize_path("res://server/start.sh")
