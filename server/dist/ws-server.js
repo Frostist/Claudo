@@ -21,11 +21,13 @@ function buildMessage(event, data) {
 class WsServer {
     constructor(port, handler) {
         this.client = null;
+        this.connectionHandler = null;
         this.handler = handler;
         this.wss = new ws_1.WebSocketServer({ port });
         this.wss.on("connection", (socket) => {
             this.client = socket;
             console.log("[WS] Client connected");
+            this.connectionHandler?.(socket);
             socket.on("message", (raw) => {
                 const msg = parseMessage(raw.toString());
                 if (msg)
@@ -45,6 +47,9 @@ class WsServer {
         if (this.client?.readyState === ws_1.WebSocket.OPEN) {
             this.client.send(buildMessage(event, data));
         }
+    }
+    onClientConnected(handler) {
+        this.connectionHandler = handler;
     }
     close() {
         this.wss.close();

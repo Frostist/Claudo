@@ -64,3 +64,45 @@ export interface TruthFile {
   weapon: Weapon;
   room: Room;
 }
+
+export interface Fact {
+  content: string;
+  source: "self" | NpcId;
+  told_by?: NpcId;       // only present when source is another NPC
+  secret: boolean;
+  contradicts?: number[]; // indices into facts[] of contradicted entries
+}
+
+export interface NpcRelationship {
+  trust: number;          // 0–1. ≥ 0.7 = will share secrets
+  knows_secret: boolean;
+}
+
+export interface MemoryGraph {
+  npc_id: NpcId;
+  archetype: string;
+  lying: boolean;         // true only for the murderer NPC
+  facts: Fact[];
+  relationships: Partial<Record<NpcId, NpcRelationship>>;
+}
+
+export const ROOM_ADJACENCY: Record<string, string[]> = {
+  "Kitchen":       ["Ballroom", "Billiard Room"],
+  "Ballroom":      ["Kitchen", "Conservatory", "Hall"],
+  "Conservatory":  ["Ballroom", "Library"],
+  "Billiard Room": ["Kitchen", "Hall", "Study"],
+  "Hall":          ["Ballroom", "Billiard Room", "Library", "Lounge"],
+  "Library":       ["Conservatory", "Hall", "Dining Room"],
+  "Study":         ["Billiard Room", "Lounge"],
+  "Lounge":        ["Hall", "Study", "Dining Room"],
+  "Dining Room":   ["Library", "Lounge"],
+};
+
+export const NPC_STARTING_ROOMS: Record<NpcId, string> = {
+  npc_scarlett: "Kitchen",
+  npc_mustard:  "Ballroom",
+  npc_white:    "Conservatory",
+  npc_green:    "Billiard Room",
+  npc_peacock:  "Hall",
+  npc_plum:     "Library",
+};

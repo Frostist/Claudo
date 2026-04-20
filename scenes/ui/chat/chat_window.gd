@@ -3,6 +3,7 @@ extends CanvasLayer
 var _active_npc_id: String = ""
 var _waiting_for_reply := false
 var _histories: Dictionary = {}  # npc_id -> Array[{speaker, text}]
+var _on_clue_closed: Callable = Callable()
 
 var _panel: Panel
 var _npc_name_label: Label
@@ -16,6 +17,7 @@ func _ready() -> void:
 	_build_ui()
 	_panel.visible = false
 	ServerBridge.npc_reply.connect(_on_npc_reply)
+	ServerBridge.npc_eliminated.connect(_on_npc_eliminated)
 
 func _build_ui() -> void:
 	_panel = Panel.new()
@@ -80,6 +82,31 @@ func _rebuild_history(npc_id: String) -> void:
 func close() -> void:
 	_panel.visible = false
 	_active_npc_id = ""
+	_message_input.editable = true
+	_send_button.disabled = false
+	if _on_clue_closed.is_valid():
+		_on_clue_closed.call()
+		_on_clue_closed = Callable()
+
+func _on_npc_eliminated(eliminated_npc_id: String) -> void:
+	if not _panel.visible:
+		return
+	if _active_npc_id.is_empty() or eliminated_npc_id != _active_npc_id:
+		return
+	_add_message("System", "%s is no longer available." % _npc_name_label.text)
+	_message_input.editable = false
+	_send_button.disabled = true
+	_waiting_for_reply = false
+
+func show_clue(npc_name: String, clue_text: String, on_closed: Callable) -> void:
+	_active_npc_id = ""
+	_on_clue_closed = on_closed
+	_npc_name_label.text = npc_name + " (body)"
+	_rebuild_history("")
+	_add_message("Clue", clue_text)
+	_message_input.editable = false
+	_send_button.disabled = true
+	_panel.visible = true
 
 func _input(event: InputEvent) -> void:
 	if _panel.visible and event.is_action_pressed("ui_cancel"):

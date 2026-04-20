@@ -2,13 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NpcAgent } from "../src/npc-agent";
 
 // Mock the Google GenAI SDK
-vi.mock("@google/genai", () => ({
-  GoogleGenAI: vi.fn().mockImplementation(() => ({
-    models: {
+vi.mock("@google/genai", () => {
+  class MockGoogleGenAI {
+    models = {
       generateContent: vi.fn().mockResolvedValue({ text: "I know nothing of that affair." }),
-    },
-  })),
-}));
+    };
+    constructor(_opts: unknown) {}
+  }
+  return { GoogleGenAI: MockGoogleGenAI };
+});
 
 describe("NpcAgent", () => {
   let agent: NpcAgent;
