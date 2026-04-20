@@ -3,6 +3,8 @@ extends Node
 signal npc_reply(npc_id: String, text: String)
 signal game_ready()
 signal npc_moved(npc_id: String, room_name: String)
+signal npc_eliminated(npc_id: String)
+signal npc_clue(npc_id: String, clue_text: String)
 
 const WS_URL := "ws://127.0.0.1:9876"
 const RECONNECT_INTERVAL := 3.0
@@ -79,6 +81,10 @@ func _handle_message(raw: String) -> void:
 			npc_reply.emit(npc_id, text)
 		"npc_moved":
 			npc_moved.emit(data.get("npc_id", ""), data.get("room_name", ""))
+		"npc_eliminated":
+			npc_eliminated.emit(data.get("npc_id", ""))
+		"npc_clue":
+			npc_clue.emit(data.get("npc_id", ""), data.get("clue_text", ""))
 		"state_snapshot":
 			pass  # Phase 2+ will handle restoring state
 		_:
@@ -101,6 +107,9 @@ func send_player_moved(room_name: String) -> void:
 
 func send_notebook_updated(text: String) -> void:
 	_send("notebook_updated", { "text": text })
+
+func send_body_interacted(npc_id: String) -> void:
+	_send("body_interacted", { "npc_id": npc_id })
 
 func _start_reconnect() -> void:
 	_reconnecting = true

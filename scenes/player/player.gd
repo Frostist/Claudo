@@ -28,6 +28,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			closest_dist = d
 			closest = npc
 	if closest:
-		var chat_window = get_tree().get_first_node_in_group("chat_window")
-		if chat_window:
-			chat_window.open(closest.npc_id, closest.npc_name)
+		if closest._is_dead:
+			ServerBridge.send_body_interacted(closest.npc_id)
+		else:
+			var chat_window = get_tree().get_first_node_in_group("chat_window")
+			if chat_window:
+				chat_window.open(closest.npc_id, closest.npc_name)
