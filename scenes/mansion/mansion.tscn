@@ -43,6 +43,9 @@ size = Vector2(288, 240)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dining"]
 size = Vector2(288, 240)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_accusation"]
+size = Vector2(288, 240)
+
 [node name="Mansion" type="Node2D"]
 script = ExtResource("1_mansion")
 
@@ -85,6 +88,12 @@ position = Vector2(832, 424)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RoomLibrary"]
 shape = SubResource("RectangleShape2D_library")
+
+[node name="RoomAccusation" type="Area2D" parent="."]
+position = Vector2(1168, 424)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomAccusation"]
+shape = SubResource("RectangleShape2D_accusation")
 
 [node name="RoomStudy" type="Area2D" parent="."]
 position = Vector2(160, 712)
@@ -208,3 +217,9 @@ centered = false
 position = Vector2(928, 624)
 texture = ExtResource("15_candelabra")
 centered = false
+
+[node name="FurnAccusationDesk" type="Sprite2D" parent="."]
+position = Vector2(1088, 384)
+texture = ExtResource("11_desk")
+centered = false
+groups = ["accusation_desk"]

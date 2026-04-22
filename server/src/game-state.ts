@@ -1,4 +1,4 @@
-import { NpcId, ChatMessage, NPC_STARTING_ROOMS } from "./types";
+import { NpcId, ChatMessage, NPC_STARTING_ROOMS, Weapon, Room } from "./types";
 
 const ALL_NPC_IDS: NpcId[] = [
   "npc_scarlett",
@@ -33,6 +33,9 @@ export class GameState {
   eliminationCount: number = 0;
   spyQueue: NpcId | null = null;
   private eliminatedNpcs: Set<NpcId> = new Set();
+
+  accusationSubmitted: boolean = false;
+  accusationResult: { correct: boolean; murderer: NpcId; weapon: Weapon; room: Room } | null = null;
 
   getChatHistory(npcId: NpcId): ChatMessage[] {
     return this.histories.get(npcId) ?? [];

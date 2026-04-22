@@ -9,6 +9,7 @@ const ROOM_NAMES := {
 	"RoomBilliardRoom": "Billiard Room",
 	"RoomHall": "Hall",
 	"RoomLibrary": "Library",
+	"RoomAccusation": "Accusation Room",
 	"RoomStudy": "Study",
 	"RoomLounge": "Lounge",
 	"RoomDiningRoom": "Dining Room",

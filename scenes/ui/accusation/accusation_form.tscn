@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://claudo_accusation_form"]
+
+[ext_resource type="Script" path="res://scenes/ui/accusation/accusation_form.gd" id="1_script"]
+
+[node name="AccusationForm" type="CanvasLayer"]
+script = ExtResource("1_script")

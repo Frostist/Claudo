@@ -21,6 +21,8 @@ class GameState {
         this.eliminationCount = 0;
         this.spyQueue = null;
         this.eliminatedNpcs = new Set();
+        this.accusationSubmitted = false;
+        this.accusationResult = null;
     }
     getChatHistory(npcId) {
         return this.histories.get(npcId) ?? [];

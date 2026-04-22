@@ -134,6 +134,26 @@ async function main() {
                 ws.send("npc_clue", { npc_id: npcId, clue_text: clue });
                 break;
             }
+            case "accusation_submit": {
+                if (state.accusationSubmitted) {
+                    ws.send("accusation_result", { error: "already_accused" });
+                    break;
+                }
+                const suspect = data.suspect_id;
+                const weapon = data.weapon;
+                const room = data.room;
+                const correct = suspect === truth.murderer && weapon === truth.weapon && room === truth.room;
+                state.accusationSubmitted = true;
+                state.accusationResult = { correct, murderer: truth.murderer, weapon: truth.weapon, room: truth.room };
+                ws.send("accusation_result", {
+                    correct,
+                    actual_murderer: truth.murderer,
+                    actual_weapon: truth.weapon,
+                    actual_room: truth.room,
+                });
+                console.log(`[Server] accusation: ${suspect}/${weapon}/${room} — ${correct ? "CORRECT" : "WRONG"}`);
+                break;
+            }
             case "reconnect": {
                 ws.send("state_snapshot", state.toSnapshot());
                 break;

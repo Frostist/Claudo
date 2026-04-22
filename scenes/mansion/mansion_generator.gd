@@ -9,6 +9,7 @@ const ROOMS = [
 	[0, 1, "RoomBilliardRoom"],
 	[1, 1, "RoomHall"],
 	[2, 1, "RoomLibrary"],
+	[3, 1, "RoomAccusation"],
 	[0, 2, "RoomStudy"],
 	[1, 2, "RoomLounge"],
 	[2, 2, "RoomDiningRoom"],
@@ -34,6 +35,7 @@ const ROOM_FLOORS := {
 	"RoomStudy":        Vector2i(9, 0),
 	"RoomLounge":       Vector2i(10, 0),
 	"RoomDiningRoom":   Vector2i(11, 0),
+	"RoomAccusation":   Vector2i(12, 0),
 }
 
 const CORRIDOR_FLOOR := Vector2i(7, 0)
@@ -50,7 +52,7 @@ func _generate_mansion() -> void:
 		_draw_room(gx * STEP_X, gy * STEP_Y, ROOM_FLOORS[room[2]])
 	# Draw corridors between horizontally adjacent rooms (same row)
 	for gy in range(3):
-		for gx in range(2):  # gaps between col 0-1 and col 1-2
+		for gx in range(3):  # gaps between col 0-1, col 1-2, and col 2-3
 			_draw_h_corridor(gx, gy)
 	# Draw corridors between vertically adjacent rooms (same col)
 	for gx in range(3):

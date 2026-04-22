@@ -5,6 +5,7 @@ signal game_ready()
 signal npc_moved(npc_id: String, room_name: String)
 signal npc_eliminated(npc_id: String)
 signal npc_clue(npc_id: String, clue_text: String)
+signal accusation_result(correct: bool, actual_murderer: String, actual_weapon: String, actual_room: String)
 
 const WS_URL := "ws://127.0.0.1:9876"
 const RECONNECT_INTERVAL := 3.0
@@ -85,6 +86,13 @@ func _handle_message(raw: String) -> void:
 			npc_eliminated.emit(data.get("npc_id", ""))
 		"npc_clue":
 			npc_clue.emit(data.get("npc_id", ""), data.get("clue_text", ""))
+		"accusation_result":
+			accusation_result.emit(
+				data.get("correct", false),
+				data.get("actual_murderer", ""),
+				data.get("actual_weapon", ""),
+				data.get("actual_room", "")
+			)
 		"state_snapshot":
 			pass  # Phase 2+ will handle restoring state
 		_:
@@ -110,6 +118,9 @@ func send_notebook_updated(text: String) -> void:
 
 func send_body_interacted(npc_id: String) -> void:
 	_send("body_interacted", { "npc_id": npc_id })
+
+func send_accusation_submit(suspect_id: String, weapon: String, room: String) -> void:
+	_send("accusation_submit", { "suspect_id": suspect_id, "weapon": weapon, "room": room })
 
 func _start_reconnect() -> void:
 	_reconnecting = true

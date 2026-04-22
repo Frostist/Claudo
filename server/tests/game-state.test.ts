@@ -89,4 +89,23 @@ describe("GameState", () => {
     state.spyQueue = null;
     expect(state.spyQueue).toBeNull();
   });
+
+  it("starts with no accusation submitted", () => {
+    expect(state.accusationSubmitted).toBe(false);
+    expect(state.accusationResult).toBeNull();
+  });
+
+  it("tracks accusation result after submission", () => {
+    state.accusationSubmitted = true;
+    state.accusationResult = {
+      correct: false,
+      murderer: "npc_mustard",
+      weapon: "Knife",
+      room: "Study",
+    };
+    expect(state.accusationSubmitted).toBe(true);
+    expect(state.accusationResult).not.toBeNull();
+    expect(state.accusationResult!.correct).toBe(false);
+    expect(state.accusationResult!.murderer).toBe("npc_mustard");
+  });
 });

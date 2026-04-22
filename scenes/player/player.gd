@@ -27,10 +27,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		if d < closest_dist:
 			closest_dist = d
 			closest = npc
+	for desk in get_tree().get_nodes_in_group("accusation_desk"):
+		var d := global_position.distance_to(desk.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest = desk
 	if closest:
-		if closest._is_dead:
-			ServerBridge.send_body_interacted(closest.npc_id)
-		else:
-			var chat_window = get_tree().get_first_node_in_group("chat_window")
-			if chat_window:
-				chat_window.open(closest.npc_id, closest.npc_name)
+		if closest.is_in_group("npc"):
+			if closest._is_dead:
+				ServerBridge.send_body_interacted(closest.npc_id)
+			else:
+				var chat_window = get_tree().get_first_node_in_group("chat_window")
+				if chat_window:
+					chat_window.open(closest.npc_id, closest.npc_name)
+		elif closest.is_in_group("accusation_desk"):
+			var form = get_tree().get_first_node_in_group("accusation_form")
+			if form:
+				form.open()

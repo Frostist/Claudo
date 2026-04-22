@@ -9,7 +9,7 @@ import { WsServer } from "./ws-server";
 import { GameState } from "./game-state";
 import { NpcAgent } from "./npc-agent";
 import { runGameSetup } from "./gm-agent";
-import { NpcId, NPC_NAMES, TruthFile } from "./types";
+import { NpcId, NPC_NAMES, TruthFile, Weapon, Room } from "./types";
 import { AutonomyLoop } from "./autonomy-loop";
 import { MemoryStore } from "./memory-store";
 import { runNpcConversation } from "./npc-conversation";
@@ -110,6 +110,27 @@ async function main(): Promise<void> {
         if (!state.isEliminated(npcId)) break;
         const clue = await spySystem.getBodyClue(npcId, process.env.GOOGLE_API_KEY!);
         ws.send("npc_clue", { npc_id: npcId, clue_text: clue });
+        break;
+      }
+
+      case "accusation_submit": {
+        if (state.accusationSubmitted) {
+          ws.send("accusation_result", { error: "already_accused" });
+          break;
+        }
+        const suspect = data.suspect_id as NpcId;
+        const weapon = data.weapon as Weapon;
+        const room = data.room as Room;
+        const correct = suspect === truth.murderer && weapon === truth.weapon && room === truth.room;
+        state.accusationSubmitted = true;
+        state.accusationResult = { correct, murderer: truth.murderer, weapon: truth.weapon, room: truth.room };
+        ws.send("accusation_result", {
+          correct,
+          actual_murderer: truth.murderer,
+          actual_weapon: truth.weapon,
+          actual_room: truth.room,
+        });
+        console.log(`[Server] accusation: ${suspect}/${weapon}/${room} — ${correct ? "CORRECT" : "WRONG"}`);
         break;
       }
 
