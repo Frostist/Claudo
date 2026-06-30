@@ -58,6 +58,7 @@ The project is in active phased development:
 
 - Godot 4.6 installed
 - Node.js 18+ installed
+- pnpm installed (`npm install -g pnpm`)
 - `GOOGLE_API_KEY` in `server/.env`
 
 Copy `server/.env.example` to `server/.env`, then add your key.

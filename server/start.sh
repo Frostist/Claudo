@@ -18,9 +18,11 @@ fi
 # Kill any leftover server from a previous run
 lsof -ti:9876 | xargs kill -9 2>/dev/null || true
 
-# Ensure dist/ reflects latest src/ changes (Godot launches dist/index.js)
+# Install dependencies then build
+echo "[Start] Installing dependencies..." >> "$SCRIPT_DIR/server.log"
+pnpm --dir "$SCRIPT_DIR" install >> "$SCRIPT_DIR/server.log" 2>&1
 echo "[Start] Building server..." >> "$SCRIPT_DIR/server.log"
-npm --prefix "$SCRIPT_DIR" run build >> "$SCRIPT_DIR/server.log" 2>&1
+pnpm --dir "$SCRIPT_DIR" run build >> "$SCRIPT_DIR/server.log" 2>&1
 echo "[Start] Build complete." >> "$SCRIPT_DIR/server.log"
 
 exec node "$SCRIPT_DIR/dist/index.js" >> "$SCRIPT_DIR/server.log" 2>&1
