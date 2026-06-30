@@ -13,13 +13,13 @@
   },
   "dependencies": {
     "@google/genai": "^0.7.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "ws": "^8.21.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/ws": "^8.5.10",
-    "typescript": "^5.4.0",
-    "vitest": "^4.1.4"
+    "@types/node": "^20.19.43",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.9"
   }
 }
